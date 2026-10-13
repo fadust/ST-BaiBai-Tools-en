@@ -80,15 +80,15 @@ const MESSAGE_COMPLETION_SOUND_MAX_LOCAL_BYTES = 5 * 1024 * 1024;
 const MESSAGE_COMPLETION_SOUND_COOLDOWN_MS = 1000;
 const MESSAGE_COMPLETION_SOUND_KEEP_ALIVE_SRC = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQQAAAAAAA==';
 const BUILTIN_COMPLETION_SOUNDS = [
-    { id: 'guoke-bell', label: '果壳铃', file: '果壳铃.mp3' },
-    { id: 'stardew-fish', label: '星露谷 - 钓鱼上钩', file: '星露谷-钓鱼上钩.mp3' },
-    { id: 'stardew-achievement', label: '星露谷 - 成就', file: '星露谷-成就.mp3' },
-    { id: 'pokemon-heal', label: '宝可梦 - 治疗', file: '宝可梦-治疗.mp3' },
-    { id: 'pokemon-berry', label: '宝可梦 - 摘果子', file: '宝可梦-摘果子.mp3' },
-    { id: 'zelda-get', label: '塞尔达 - 获取', file: '塞尔达-获取.mp3' },
-    { id: 'zelda-complete', label: '塞尔达 - 完成', file: '塞尔达-完成.mp3' },
-    { id: 'bubble', label: 'Q弹气泡', file: 'Q弹气泡.mp3' },
-    { id: 'line-yangqin', label: 'LINE - 扬琴', file: 'LINE-扬琴.mp3' },
+    { id: 'guoke-bell', label: 'Nutshell bell', file: '果壳铃.mp3' },
+    { id: 'stardew-fish', label: 'Stardew Valley - Fish bite', file: '星露谷-钓鱼上钩.mp3' },
+    { id: 'stardew-achievement', label: 'Stardew Valley - Achievement', file: '星露谷-成就.mp3' },
+    { id: 'pokemon-heal', label: 'Pokémon - Heal', file: '宝可梦-治疗.mp3' },
+    { id: 'pokemon-berry', label: 'Pokémon - Pick berry', file: '宝可梦-摘果子.mp3' },
+    { id: 'zelda-get', label: 'Zelda - Item get', file: '塞尔达-获取.mp3' },
+    { id: 'zelda-complete', label: 'Zelda - Complete', file: '塞尔达-完成.mp3' },
+    { id: 'bubble', label: 'Bouncy bubble', file: 'Q弹气泡.mp3' },
+    { id: 'line-yangqin', label: 'LINE - Dulcimer', file: 'LINE-扬琴.mp3' },
 ];
 
 export {

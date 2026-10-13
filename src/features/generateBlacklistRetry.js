@@ -8,7 +8,7 @@ import { extensionState, settings } from './state.js';
 const SUPPORTED_TYPES = new Set(['normal', 'regenerate']);
 const SETTLE_TIMEOUT_MS = 60_000;
 const STOPPED_LAUNCH_TTL_MS = 15_000;
-const BLACKLIST_RETRY_TOAST_TITLE = '黑名单命中自动重试';
+const BLACKLIST_RETRY_TOAST_TITLE = 'Auto-retry on blacklist hit';
 
 function getBlacklistRetryState() {
     return extensionState.generateBlacklistRetry ??= {
@@ -34,7 +34,7 @@ function takeStoppedLaunch(state, context) {
     const sameTarget = run.chat === context.chat && run.characterId === context.characterId
         && run.chatId === context.chatId;
     if (expired || !sameTarget) return null;
-    console.debug(`${LOG_PREFIX} [黑名单重试] 复用被停止打断的重试预算（第 ${run.retries}/${run.maxRetries} 次）`);
+    console.debug(`${LOG_PREFIX} [Blacklist retry] Reusing the retry budget interrupted by stop (attempt ${run.retries}/${run.maxRetries})`);
     return run;
 }
 
@@ -61,7 +61,7 @@ function compileGenerateBlacklistEntry(entry) {
         } catch (error) {
             if (!warnedBlacklistRegex.has(entry)) {
                 warnedBlacklistRegex.add(entry);
-                console.warn(`${LOG_PREFIX} [黑名单重试] 正则表达式无效，已按普通文本匹配：${entry}`, error);
+                console.warn(`${LOG_PREFIX} [Blacklist retry] Invalid regular expression, matched as plain text: ${entry}`, error);
             }
         }
     }
@@ -207,7 +207,7 @@ function startGenerateBlacklistRetry(type, options, dryRun) {
     if (context.powerUserSettings?.auto_swipe) {
         clearStoppedLaunch(state);
         cancelGenerateBlacklistRetry(state.run);
-        globalThis.toastr?.warning('酒馆原生自动切换回复已开启，黑名单重试本轮暂停。', BLACKLIST_RETRY_TOAST_TITLE);
+        globalThis.toastr?.warning('SillyTavern\'s native auto-swipe is on; blacklist retry is paused this round.', BLACKLIST_RETRY_TOAST_TITLE);
         return;
     }
     // STARTED 之后、AFTER_COMMANDS 之前被停止时,酒馆可能已经重建 controller 把这一代
@@ -215,7 +215,7 @@ function startGenerateBlacklistRetry(type, options, dryRun) {
     if (isCurrentGenerationStopped()) {
         clearStoppedLaunch(state);
         cancelGenerateBlacklistRetry(state.run);
-        console.debug(`${LOG_PREFIX} [黑名单重试] 启动窗口内已停止,本轮不再重新武装`);
+        console.debug(`${LOG_PREFIX} [Blacklist retry] Stopped within the start window; not re-arming this round`);
         return;
     }
 
@@ -265,8 +265,8 @@ async function checkGenerateBlacklistReply(run) {
         if (Date.now() >= run.settleDeadline) {
             const waitReason = [waitingForSave && 'isChatSaving', waitingForSend && 'is_send_press',
                 waitingForStream && 'streamingProcessor'].filter(Boolean).join(', ');
-            globalThis.toastr?.warning('等待酒馆收尾超时，已停止黑名单重试，当前回复已保留。', BLACKLIST_RETRY_TOAST_TITLE);
-            console.warn(`${LOG_PREFIX} [黑名单重试] 等待 ST 收尾超时：${waitReason}`);
+            globalThis.toastr?.warning('Timed out waiting for SillyTavern to finish; blacklist retry stopped and the current reply was kept.', BLACKLIST_RETRY_TOAST_TITLE);
+            console.warn(`${LOG_PREFIX} [Blacklist retry] Timed out waiting for ST to finish: ${waitReason}`);
             cancelGenerateBlacklistRetry(run);
         } else {
             queueGenerateBlacklistCheck(run);
@@ -286,7 +286,7 @@ async function checkGenerateBlacklistReply(run) {
         return;
     }
     if (run.retries >= run.maxRetries) {
-        globalThis.toastr?.warning(`总重试次数已达 ${run.maxRetries} 次，已停止重试并保留最后回复。`, BLACKLIST_RETRY_TOAST_TITLE);
+        globalThis.toastr?.warning(`Reached ${run.maxRetries} total retries; stopped retrying and kept the last reply.`, BLACKLIST_RETRY_TOAST_TITLE);
         cancelGenerateBlacklistRetry(run, true);
         return;
     }
@@ -296,7 +296,7 @@ async function checkGenerateBlacklistReply(run) {
         script.setSendButtonState(true);
         context.deactivateSendButtons();
         globalThis.toastr?.warning(
-            `命中黑名单「${match.slice(0, 60)}」，1.5 秒后重试（第 ${run.retries + 1}/${run.maxRetries} 次）。`,
+            `Blacklist hit "${match.slice(0, 60)}"; retrying in 1.5 seconds (attempt ${run.retries + 1}/${run.maxRetries}).`,
             BLACKLIST_RETRY_TOAST_TITLE,
             { escapeHtml: true, timeOut: 2500 },
         );
@@ -312,7 +312,7 @@ async function checkGenerateBlacklistReply(run) {
         // ponytail: ST owns replacement, MESSAGE_DELETED cleanup and saving, just like manual regenerate.
         await context.generate('regenerate', { automatic_trigger: true });
     } catch (error) {
-        console.warn(`${LOG_PREFIX} [黑名单重试] 原生重新生成抛出异常`, error);
+        console.warn(`${LOG_PREFIX} [Blacklist retry] Native regenerate threw an exception`, error);
         cancelGenerateBlacklistRetry(run);
     } finally {
         if (state.launching === run) cancelGenerateBlacklistRetry(run);

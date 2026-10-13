@@ -1,7 +1,7 @@
 
 let settings = {};
 let extensionState = {};
-let LOG_PREFIX = '[\u67cf\u5b9d\u7bb1]';
+let LOG_PREFIX = '[BaiBai Tools]';
 let recordLongDomRefresh = null;
 
 function configureChatOptimizations(context = {}) {

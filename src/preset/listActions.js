@@ -52,17 +52,17 @@ async function handlePresetPromptActionButtonClick(event, action = null) {
         closePresetPromptActionMenus();
 
         if (!isPresetGroupingEnabled()) {
-            toastr.warning(t`请先开启预设分组。`);
+            toastr.warning(t`Turn on preset groups first.`);
             return;
         }
 
         if (!promptId) {
-            toastr.warning(t`没有找到要作为起点的预设条目。`);
+            toastr.warning(t`No preset entry found to use as the start.`);
             return;
         }
 
         if (isPresetPromptAssignedToExistingGroup(promptId)) {
-            toastr.warning(t`分组内条目暂不支持再次创建分组。`);
+            toastr.warning(t`Entries inside a group cannot create another group yet.`);
             return;
         }
 
@@ -237,11 +237,11 @@ async function handlePresetPromptActionButtonClick(event, action = null) {
 
 async function promptPresetPromptDeleteChoice(promptId) {
     const prompt = promptManager?.getPromptById?.(promptId);
-    const promptName = escapeHtml(String(prompt?.name || promptId || t`这个条目`));
+    const promptName = escapeHtml(String(prompt?.name || promptId || t`this entry`));
     const canDelete = isPresetPromptDeleteOrDetachAllowed(prompt);
     const customButtons = [
         {
-            text: t`仅移除`,
+            text: t`Remove only`,
             icon: 'fa-chain-broken',
             result: PRESET_PROMPT_DELETE_CHOICE_DETACH,
         },
@@ -249,7 +249,7 @@ async function promptPresetPromptDeleteChoice(promptId) {
 
     if (canDelete) {
         customButtons.push({
-            text: t`彻底删除`,
+            text: t`Delete permanently`,
             icon: 'fa-trash',
             result: PRESET_PROMPT_DELETE_CHOICE_DELETE,
             classes: ['caution'],
@@ -258,15 +258,15 @@ async function promptPresetPromptDeleteChoice(promptId) {
 
     return callGenericPopup(
         `<div class="bai-bai-preset-prompt-delete-choice">
-            <p>${t`要如何处理这个预设条目？`}</p>
+            <p>${t`What should happen to this preset entry?`}</p>
             <p><strong>${promptName}</strong></p>
-            <p>${t`仅移除会保留条目本体，以后仍可重新添加；彻底删除会从当前预设中删除这个条目定义。`}</p>
+            <p>${t`Remove only keeps the entry itself so you can add it again later; delete permanently removes the entry definition from the current preset.`}</p>
         </div>`,
         POPUP_TYPE.TEXT,
         '',
         {
             okButton: false,
-            cancelButton: t`取消`,
+            cancelButton: t`Cancel`,
             customButtons,
         },
     );
@@ -274,26 +274,26 @@ async function promptPresetPromptDeleteChoice(promptId) {
 
 async function deleteCurrentPresetPromptEntry(promptId) {
     if (!promptId || !promptManager || !Array.isArray(promptManager.serviceSettings?.prompts)) {
-        toastr.warning(t`没有找到要删除的预设条目。`);
+        toastr.warning(t`Preset entry to delete not found.`);
         return false;
     }
 
     const prompt = promptManager.getPromptById?.(promptId);
 
     if (!prompt) {
-        toastr.warning(t`没有找到要删除的预设条目。`);
+        toastr.warning(t`Preset entry to delete not found.`);
         return false;
     }
 
     if (!isPresetPromptDeleteOrDetachAllowed(prompt)) {
-        toastr.warning(t`这个预设条目不能被彻底删除。`);
+        toastr.warning(t`This preset entry cannot be deleted permanently.`);
         return false;
     }
 
     const promptIndex = promptManager.serviceSettings.prompts.findIndex(item => item?.identifier === promptId);
 
     if (promptIndex < 0) {
-        toastr.warning(t`没有找到要删除的预设条目。`);
+        toastr.warning(t`Preset entry to delete not found.`);
         return false;
     }
 
@@ -319,9 +319,9 @@ async function deleteCurrentPresetPromptEntry(promptId) {
     refreshPromptManagerTokensDebounced();
     void flushPendingPresetPromptChanges({ includeOpenAiPresetSaves: false }).catch(error => {
         console.debug(`${LOG_PREFIX} Failed to save deleted preset prompt changes`, error);
-        toastr.error(t`删除预设条目后保存失败。`);
+        toastr.error(t`Preset entry deleted, but saving failed.`);
     });
-    toastr.success(t`已彻底删除预设条目。`);
+    toastr.success(t`Preset entry deleted permanently.`);
     return true;
 }
 
@@ -417,7 +417,7 @@ async function copyPresetPromptEntryFromAction(action) {
 
 async function copyPresetPromptEntry(promptId) {
     if (!promptManager?.activeCharacter || !Array.isArray(promptManager.serviceSettings?.prompts)) {
-        toastr.warning(t`当前无法复制这个预设条目。`);
+        toastr.warning(t`This preset entry cannot be copied right now.`);
         return false;
     }
 
@@ -425,14 +425,14 @@ async function copyPresetPromptEntry(promptId) {
     const promptOrder = promptManager.getPromptOrderForCharacter?.(promptManager.activeCharacter);
 
     if (!sourcePrompt || !Array.isArray(promptOrder)) {
-        toastr.warning(t`没有找到要复制的预设条目。`);
+        toastr.warning(t`Preset entry to copy not found.`);
         return false;
     }
 
     const sourceOrderIndex = promptOrder.findIndex(entry => entry?.identifier === promptId);
 
     if (sourceOrderIndex < 0) {
-        toastr.warning(t`这个预设条目不在当前列表中。`);
+        toastr.warning(t`This preset entry is not in the current list.`);
         return false;
     }
 
@@ -470,12 +470,12 @@ async function copyPresetPromptEntry(promptId) {
 
     try {
         await saveOpenAiPresetAfterPromptEdit();
-        toastr.success(t`已复制预设条目。`);
+        toastr.success(t`Preset entry copied.`);
         refreshPromptManagerTokensDebounced();
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to save copied preset prompt`, error);
-        toastr.error(t`复制预设条目后保存失败。`);
+        toastr.error(t`Preset entry copied, but saving failed.`);
         return false;
     }
 }
@@ -491,8 +491,8 @@ function createUniquePresetPromptIdentifier() {
 }
 
 function createPresetPromptCopyName(name) {
-    const sourceName = String(name || t`未命名条目`);
-    const baseName = `${sourceName} 副本`;
+    const sourceName = String(name || t`Unnamed entry`);
+    const baseName = `${sourceName} copy`;
     const existingNames = new Set(
         (promptManager?.serviceSettings?.prompts ?? [])
             .map(prompt => prompt?.name)

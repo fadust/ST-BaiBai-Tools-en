@@ -156,9 +156,9 @@ function getSpeakerName(ctx, message) {
         return String(message.name);
     }
     if (message?.is_user) {
-        return String(ctx?.name1 ?? '我');
+        return String(ctx?.name1 ?? 'Me');
     }
-    return String(ctx?.name2 ?? '角色');
+    return String(ctx?.name2 ?? 'Character');
 }
 
 // 把一条消息渲染成展示用 HTML；messageFormatting 缺失时回退为转义纯文本。
@@ -188,7 +188,7 @@ async function saveFloorEdit(ctx, index, newText) {
     const chat = getChatArray(ctx);
     const message = chat[index];
     if (!message) {
-        throw new Error('楼层不存在');
+        throw new Error('Message does not exist');
     }
 
     const text = String(newText ?? '');
@@ -236,13 +236,13 @@ async function saveFloorEdit(ctx, index, newText) {
 
     const saveChat = ctx?.saveChat;
     if (typeof saveChat !== 'function') {
-        throw new Error('无法保存：当前酒馆版本未暴露保存接口');
+        throw new Error('Cannot save: this SillyTavern version does not expose a save API');
     }
     await saveChat();
 }
 
 async function confirmFloorDelete(ctx, index, deleteCount) {
-    const message = `将删除第 ${index} 层及之后的楼层，删除后无法撤销。确定继续吗？`;
+    const message = `This deletes message ${index} and every message after it. This cannot be undone. Continue?`;
     if (typeof ctx?.callGenericPopup === 'function' && ctx?.POPUP_TYPE && 'CONFIRM' in ctx.POPUP_TYPE) {
         return Boolean(await ctx.callGenericPopup(message, ctx.POPUP_TYPE.CONFIRM));
     }
@@ -252,7 +252,7 @@ async function confirmFloorDelete(ctx, index, deleteCount) {
 async function deleteFloorRangeWithSlashCommand(ctx, index, options = {}) {
     const chat = getChatArray(ctx);
     if (!chat[index]) {
-        throw new Error('楼层不存在');
+        throw new Error('Message does not exist');
     }
 
     const deleteCount = chat.length - index;
@@ -262,7 +262,7 @@ async function deleteFloorRangeWithSlashCommand(ctx, index, options = {}) {
 
     const executeSlashCommandsWithOptions = ctx?.executeSlashCommandsWithOptions;
     if (typeof executeSlashCommandsWithOptions !== 'function') {
-        throw new Error('无法删除：当前酒馆版本未暴露斜杠命令执行接口');
+        throw new Error('Cannot delete: this SillyTavern version does not expose the slash command API');
     }
 
     const confirmed = await confirmFloorDelete(ctx, index, deleteCount);
@@ -280,7 +280,7 @@ async function deleteFloorRangeWithSlashCommand(ctx, index, options = {}) {
     });
 
     if (result?.isError) {
-        throw new Error(result.errorMessage || '斜杠删除命令执行失败');
+        throw new Error(result.errorMessage || 'Slash delete command failed');
     }
 
     return deleteCount;
@@ -291,12 +291,12 @@ async function toggleFloorHiddenWithSlashCommand(ctx, index) {
     const chat = getChatArray(ctx);
     const message = chat[index];
     if (!message) {
-        throw new Error('楼层不存在');
+        throw new Error('Message does not exist');
     }
 
     const executeSlashCommandsWithOptions = ctx?.executeSlashCommandsWithOptions;
     if (typeof executeSlashCommandsWithOptions !== 'function') {
-        throw new Error('当前酒馆版本未暴露斜杠命令执行接口');
+        throw new Error('This SillyTavern version does not expose the slash command API');
     }
 
     const willHide = !message.is_system;
@@ -307,7 +307,7 @@ async function toggleFloorHiddenWithSlashCommand(ctx, index) {
     });
 
     if (result?.isError) {
-        throw new Error(result.errorMessage || '斜杠命令执行失败');
+        throw new Error(result.errorMessage || 'Slash command failed');
     }
 
     return willHide;
@@ -354,7 +354,7 @@ export function installFloorDirectory() {
         icon.className = 'fa-solid fa-building extensionsMenuExtensionButton';
 
         const label = document.createElement('span');
-        label.textContent = '楼层管理器';
+        label.textContent = 'Message manager';
 
         button.append(icon, label);
         container.appendChild(button);
@@ -401,16 +401,16 @@ function openFloorDirectoryDialog() {
 
     const title = document.createElement('div');
     title.className = 'bai-bai-floor-title';
-    title.textContent = '楼层管理器';
+    title.textContent = 'Message manager';
 
     const count = document.createElement('div');
     count.className = 'bai-bai-floor-count';
-    count.textContent = chat.length ? `共 ${chat.length} 层` : '暂无楼层';
+    count.textContent = chat.length ? `${chat.length} messages` : 'No messages yet';
 
     const closeButton = document.createElement('button');
     closeButton.type = 'button';
     closeButton.className = 'bai-bai-floor-close';
-    closeButton.setAttribute('aria-label', '关闭');
+    closeButton.setAttribute('aria-label', 'Close');
     closeButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
 
     head.append(title, count, closeButton);
@@ -425,13 +425,13 @@ function openFloorDirectoryDialog() {
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'bai-bai-floor-input';
-    input.placeholder = '输入楼层号 / 关键词…';
-    input.setAttribute('aria-label', '输入楼层号或关键词');
+    input.placeholder = 'Enter message number / keyword…';
+    input.setAttribute('aria-label', 'Enter a message number or keyword');
 
     const clearButton = document.createElement('button');
     clearButton.type = 'button';
     clearButton.className = 'bai-bai-floor-clear';
-    clearButton.setAttribute('aria-label', '清空');
+    clearButton.setAttribute('aria-label', 'Clear');
     clearButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
     clearButton.disabled = true;
 
@@ -442,7 +442,7 @@ function openFloorDirectoryDialog() {
     const filterBar = document.createElement('div');
     filterBar.className = 'bai-bai-floor-filter';
     filterBar.setAttribute('role', 'group');
-    filterBar.setAttribute('aria-label', '按发言者筛选');
+    filterBar.setAttribute('aria-label', 'Filter by speaker');
 
     const FILTERS = [
         { key: 'all', label: 'All' },
@@ -478,7 +478,7 @@ function openFloorDirectoryDialog() {
     const mobileClose = document.createElement('button');
     mobileClose.type = 'button';
     mobileClose.className = 'bai-bai-floor-close bai-bai-floor-mobile-only';
-    mobileClose.setAttribute('aria-label', '关闭');
+    mobileClose.setAttribute('aria-label', 'Close');
     mobileClose.innerHTML = '<i class="fa-solid fa-xmark"></i>';
 
     bar.append(barIcon, input, clearButton);
@@ -555,11 +555,11 @@ function openFloorDirectoryDialog() {
         if (!totalItems) {
             const scope = renderState.filter === 'user' ? 'User '
                 : renderState.filter === 'bot' ? 'Char '
-                : renderState.filter === 'hidden' ? '隐藏'
+                : renderState.filter === 'hidden' ? 'hidden '
                 : '';
             const message = keyword
-                ? `没有${scope}楼层匹配「${keyword}」`
-                : scope ? `当前没有${scope}楼层` : '当前没有可显示的楼层';
+                ? `No ${scope}messages match "${keyword}"`
+                : scope ? `No ${scope}messages` : 'No messages to show';
             renderEmpty(message);
             return;
         }
@@ -605,7 +605,7 @@ function openFloorDirectoryDialog() {
         prev.type = 'button';
         prev.className = 'bai-bai-floor-page-btn';
         prev.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
-        prev.setAttribute('aria-label', '上一页');
+        prev.setAttribute('aria-label', 'Previous');
         prev.disabled = renderState.page <= 1;
         prev.addEventListener('click', () => goToPage(renderState.page - 1));
 
@@ -617,7 +617,7 @@ function openFloorDirectoryDialog() {
         next.type = 'button';
         next.className = 'bai-bai-floor-page-btn';
         next.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
-        next.setAttribute('aria-label', '下一页');
+        next.setAttribute('aria-label', 'Next');
         next.disabled = renderState.page >= totalPages;
         next.addEventListener('click', () => goToPage(renderState.page + 1));
 
@@ -689,8 +689,8 @@ function openFloorDirectoryDialog() {
         // 隐藏楼层（is_system）：沿用 ST 的小幽灵标识，放在身份标签右边。
         const ghost = document.createElement('span');
         ghost.className = 'bai-bai-floor-ghost';
-        ghost.title = '已隐藏楼层（不参与上下文）';
-        ghost.setAttribute('aria-label', '已隐藏楼层');
+        ghost.title = 'Hidden message (excluded from context)';
+        ghost.setAttribute('aria-label', 'Hidden message');
         ghost.innerHTML = '<i class="fa-solid fa-ghost"></i>';
         meta.append(speaker, tag, ghost);
 
@@ -717,14 +717,14 @@ function openFloorDirectoryDialog() {
         const editButton = document.createElement('button');
         editButton.type = 'button';
         editButton.className = 'bai-bai-floor-action';
-        editButton.innerHTML = '<i class="fa-solid fa-pen-to-square"></i><span>编辑</span>';
+        editButton.innerHTML = '<i class="fa-solid fa-pen-to-square"></i><span>Edit</span>';
         const hideButton = document.createElement('button');
         hideButton.type = 'button';
         hideButton.className = 'bai-bai-floor-action';
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.className = 'bai-bai-floor-action bai-bai-floor-action-danger';
-        deleteButton.innerHTML = '<i class="fa-solid fa-trash-can"></i><span>删除</span>';
+        deleteButton.innerHTML = '<i class="fa-solid fa-trash-can"></i><span>Delete</span>';
 
         body.append(detail, actions);
 
@@ -734,8 +734,8 @@ function openFloorDirectoryDialog() {
             row.classList.toggle('bai-bai-floor-row-hidden', hidden);
             ghost.style.display = hidden ? '' : 'none';
             hideButton.innerHTML = hidden
-                ? '<i class="fa-solid fa-eye"></i><span>显示</span>'
-                : '<i class="fa-solid fa-eye-slash"></i><span>隐藏</span>';
+                ? '<i class="fa-solid fa-eye"></i><span>Show</span>'
+                : '<i class="fa-solid fa-eye-slash"></i><span>Hide</span>';
         };
         applyHiddenState();
 
@@ -767,12 +767,12 @@ function openFloorDirectoryDialog() {
             const save = document.createElement('button');
             save.type = 'button';
             save.className = 'bai-bai-floor-action bai-bai-floor-action-primary';
-            save.innerHTML = '<i class="fa-solid fa-check"></i><span>保存</span>';
+            save.innerHTML = '<i class="fa-solid fa-check"></i><span>Save</span>';
 
             const cancel = document.createElement('button');
             cancel.type = 'button';
             cancel.className = 'bai-bai-floor-action';
-            cancel.innerHTML = '<i class="fa-solid fa-xmark"></i><span>取消</span>';
+            cancel.innerHTML = '<i class="fa-solid fa-xmark"></i><span>Cancel</span>';
 
             detail.innerHTML = '';
             detail.appendChild(textarea);
@@ -792,13 +792,13 @@ function openFloorDirectoryDialog() {
             const doSave = async () => {
                 const freshCtx = getStContext();
                 if (!freshCtx) {
-                    toastError('无法读取聊天上下文，保存失败');
+                    toastError('Cannot read the chat context; save failed');
                     return;
                 }
                 save.disabled = true;
                 cancel.disabled = true;
                 const previousHtml = save.innerHTML;
-                save.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>保存中</span>';
+                save.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Saving</span>';
                 const previousMessage = message;
                 const previousPreviewText = previewText;
                 const draftMessage = { ...(message ?? {}), mes: textarea.value };
@@ -815,7 +815,7 @@ function openFloorDirectoryDialog() {
                         message = { ...(message ?? {}), mes: textarea.value };
                         updatePreview(message);
                     }
-                    toastSuccess(`已保存第 ${index} 层`);
+                    toastSuccess(`Saved message ${index}`);
                     renderView();
                 } catch (error) {
                     message = previousMessage;
@@ -825,7 +825,7 @@ function openFloorDirectoryDialog() {
                     save.disabled = false;
                     cancel.disabled = false;
                     save.innerHTML = previousHtml;
-                    toastError(`保存失败：${error?.message ?? error}`);
+                    toastError(`Save failed: ${error?.message ?? error}`);
                 }
             };
             save.addEventListener('click', doSave);
@@ -842,13 +842,13 @@ function openFloorDirectoryDialog() {
         hideButton.addEventListener('click', async () => {
             const freshCtx = getStContext();
             if (!freshCtx) {
-                toastError('无法读取聊天上下文，操作失败');
+                toastError('Cannot read the chat context; operation failed');
                 return;
             }
 
             hideButton.disabled = true;
             const previousHtml = hideButton.innerHTML;
-            hideButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>处理中</span>';
+            hideButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Working</span>';
             try {
                 const nowHidden = await toggleFloorHiddenWithSlashCommand(freshCtx, index);
                 const latestChat = getChatArray(freshCtx);
@@ -859,11 +859,11 @@ function openFloorDirectoryDialog() {
                     updatePreview(chat[index]);
                 }
                 applyHiddenState();
-                toastSuccess(nowHidden ? `已隐藏第 ${index} 层` : `已显示第 ${index} 层`);
+                toastSuccess(nowHidden ? `Message ${index} hidden` : `Message ${index} shown`);
             } catch (error) {
                 console.error(`${LOG_PREFIX} toggle floor hidden failed`, error);
                 hideButton.innerHTML = previousHtml;
-                toastError(`操作失败：${error?.message ?? error}`);
+                toastError(`Operation failed: ${error?.message ?? error}`);
             } finally {
                 hideButton.disabled = false;
             }
@@ -871,14 +871,14 @@ function openFloorDirectoryDialog() {
         deleteButton.addEventListener('click', async () => {
             const freshCtx = getStContext();
             if (!freshCtx) {
-                toastError('无法读取聊天上下文，删除失败');
+                toastError('Cannot read the chat context; delete failed');
                 return;
             }
 
             editButton.disabled = true;
             deleteButton.disabled = true;
             const previousHtml = deleteButton.innerHTML;
-            deleteButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>删除中</span>';
+            deleteButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Deleting</span>';
             const previousChat = chat;
             const previousExpanded = new Set(renderState.expanded);
             let didOptimisticDelete = false;
@@ -896,7 +896,7 @@ function openFloorDirectoryDialog() {
                     if (latestChat.length <= index) {
                         chat = latestChat;
                     }
-                    toastSuccess(`已删除第 ${index} 层及之后 ${deletedCount} 层`);
+                    toastSuccess(`Deleted message ${index} and the ${deletedCount} after it`);
                 }
             } catch (error) {
                 if (didOptimisticDelete) {
@@ -905,7 +905,7 @@ function openFloorDirectoryDialog() {
                     apply(input.value);
                 }
                 console.error(`${LOG_PREFIX} delete floor range failed`, error);
-                toastError(`删除失败：${error?.message ?? error}`);
+                toastError(`Delete failed: ${error?.message ?? error}`);
             } finally {
                 editButton.disabled = false;
                 deleteButton.disabled = false;
@@ -992,11 +992,11 @@ function openFloorDirectoryDialog() {
         const openedChat = chat;
 
         if (!openedCtx || !openedChat.length) {
-            count.textContent = '暂无楼层';
-            renderEmpty('当前没有打开的聊天');
+            count.textContent = 'No messages yet';
+            renderEmpty('No chat is open');
             return;
         }
-        count.textContent = `共 ${openedChat.length} 层`;
+        count.textContent = `${openedChat.length} messages`;
 
         // 列表展示了一组（已按筛选收集、index 升序）楼层时，决定最终方向并落到合适的页：
         //   移动端正序（旧在上、最新在底，贴合聊天滚动方向）→ 显示第 1 页，实际切到末尾并滚到底；
@@ -1049,20 +1049,20 @@ function openFloorDirectoryDialog() {
             const entries = [];
             if (inRange) {
                 renderState.expanded = new Set([target]);
-                entries.push({ type: 'header', label: `定位 · 楼层 #${target}` });
+                entries.push({ type: 'header', label: `Jump · message #${target}` });
                 entries.push(buildMessageEntry(openedChat, target));
             } else {
                 renderState.expanded = new Set();
             }
             if (orderedMatches.length) {
-                entries.push({ type: 'header', label: `文本包含「${value}」的楼层（${orderedMatches.length}）` });
+                entries.push({ type: 'header', label: `Messages containing "${value}" (${orderedMatches.length})` });
                 for (const index of orderedMatches) {
                     entries.push(buildMessageEntry(openedChat, index));
                 }
             }
 
             if (!entries.length) {
-                renderEmpty(`楼层号 ${value} 超出范围（共 ${openedChat.length} 层，0 ~ ${openedChat.length - 1}），且没有楼层文本包含「${value}」`);
+                renderEmpty(`Message number ${value} is out of range (${openedChat.length} messages, 0 ~ ${openedChat.length - 1}), and no message text contains "${value}"`);
                 return;
             }
 

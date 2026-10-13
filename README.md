@@ -1,292 +1,305 @@
-# 柏宝箱
+# BaiBai Tools (English)
 
-柏宝箱是一个 SillyTavern 第三方扩展，主要用来缓解移动端、长聊天、海量角色/正则/预设场景下的卡顿。它会在不改变 SillyTavern 原有使用方式的前提下，接管部分高开销的列表渲染、接口请求、编辑器和滚动行为。
+> **Unofficial English port.** This is a community translation of
+> [ST-BaiBai-Tools (柏宝箱)](https://github.com/baibai-git/ST-BaiBai-Tools) by **baibai-git (柏柏)**. All credit for the extension goes to the original author.
+> Only user-facing text (UI, toasts, logs, docs) was translated; behavior is unchanged.
+> The original Chinese README is kept as [README.zh-CN.md](README.zh-CN.md).
+>
+> The original repository has no license file. This port is published without the author's explicit permission, as a courtesy translation.
+>
+> **If you are the original author and want this port taken down or changed, open an issue here and it will be removed promptly.**
+>
+> Report translation problems here. Report bugs in the extension itself upstream.
 
-当前版本：`0.30.13`
+BaiBai Tools (柏宝箱) is a third-party SillyTavern extension that eases lag on mobile, in long chats, and with large numbers of characters, regexes and presets. Without changing how SillyTavern is used, it takes over some expensive list rendering, API requests, editors and scrolling behavior.
 
-## 功能总览
+Current version: `0.30.13`
 
-- 移动端输入框、自动补全和聊天编辑时的响应优化
-- 长聊天 DOM 渲染优化，减少屏幕外楼层的布局和绘制开销
-- 管理聊天文件弹窗请求加速、滚动优化和关闭清理
-- 主页最近聊天直达目标聊天，避免先渲染角色上一次聊天
-- 角色列表、Persona 列表和欢迎页最近聊天头像缩略图懒加载
-- 角色搜索输入框拼音输入优化，减少中文输入法导致的频繁搜索和重绘
-- OpenAI 预设切换、拖拽、开关、保存和 Token 统计刷新优化
-- 预设内容、自定义 CSS、角色描述的 CodeMirror 编辑器优化
-- 正则列表 Vue 分组管理器，支持分组、拖拽、批量移动和延迟保存
-- 原版世界书优化与世界书新布局，减少原版交互、抽屉动画和 Select2 初始化带来的卡顿
-- 自定义 CSS Shadow Property，缓解切换美化/主题时的大段 CSS 写入卡顿
-- 翻译更新事件保存优化，避免自动翻译关闭时的无效长聊天保存
-- 聊天保存请求 Gzip 压缩，公网访问时减少保存请求体积
-- 消息生成完成提示音，支持内置音频、音频 URL 和本地文件
-- 生成失败自动重试，以及回复正文命中黑名单后的有限重试
-- 柏宝库分页/加速：Settings、扩展 Manifest 合并请求、角色列表、最近聊天、美化主题懒加载、消息后台生成、Tokenizer 批量计数
+## Features at a glance
 
-## 聊天优化
+- Faster input box, autocomplete and message editing on mobile
+- Long chat DOM rendering optimization, reducing layout and paint of off-screen messages
+- Chat file manager: faster requests, smoother scrolling, cleanup on close
+- Recent chats on the home page open the target chat directly, without first rendering the character's previous chat
+- Lazy-loaded avatar thumbnails in the character list, persona list and welcome-page recent chats
+- Character search box tuned for pinyin input, reducing frequent searches and repaints caused by Chinese IMEs
+- Faster OpenAI preset switching, dragging, toggling, saving and token count refresh
+- CodeMirror editors for preset content, custom CSS and character description
+- Vue regex group manager with grouping, dragging, bulk moves and deferred saving
+- Native World Info optimization and a new World Info layout, reducing lag from native interactions, drawer animations and Select2 initialization
+- Custom CSS shadow property, easing lag from writing large CSS when switching themes
+- Translate update event save optimization, avoiding useless long-chat saves when auto-translate is off
+- Gzip compression of chat save requests, reducing request size over the public internet
+- Message completion sound, with built-in audio, an audio URL or a local file
+- Auto-retry on failed generation, and limited retries when the reply text hits a blacklist
+- BaiBaoKu paging/acceleration: settings, merged extension manifest request, character list, recent chats, lazy-loaded themes, background message generation, batched tokenizer counts
 
-### 长聊天渲染优化
+## Chat optimizations
 
-启用 `长聊天渲染优化` 后，扩展会在当前聊天楼层文本量较大时为消息楼层应用 `content-visibility` 和高度占位缓存，减少屏幕外楼层参与布局和绘制。进入聊天后会自动滚到底部，并用临时底部锚点处理初始加载期间的高度变化。
+### Long chat rendering optimization
 
-生成新消息或更新楼层时，扩展会尽量保持底部或最新楼层位置稳定，避免长聊天中常见的跳动、滚不到底和反复重排。
+With `Long chat rendering optimization` on, when the current chat holds a lot of message text, the extension applies `content-visibility` and cached placeholder heights to messages so off-screen messages skip layout and paint. On entering a chat it scrolls to the bottom automatically and uses a temporary bottom anchor to absorb height changes during initial loading.
 
-### 减少加载楼层数
+When new messages generate or messages update, the extension keeps the bottom or latest message position as stable as it can, avoiding the jumps, failure to reach the bottom, and repeated reflows common in long chats.
 
-启用 `减少加载楼层数` 后，扩展会将 SillyTavern 的初始加载消息数量限制为最多 10 层。原值为 `0`（加载全部）或大于 `10` 时会自动改为 `10`，`1` 到 `10` 保持不变。扩展会监听原生设置变动，并在普通聊天或群聊读取前再次检查。
+### Load fewer messages
 
-该设置限制的是初始渲染到页面的楼层数量；聊天文件仍会由 SillyTavern 完整读取。
+With `Load fewer messages` on, SillyTavern's initial number of loaded messages is limited to at most 10. A value of `0` (load all) or above `10` becomes `10`; `1` to `10` stay as they are. The extension watches the native setting and checks again before a regular or group chat loads.
 
-### 管理聊天文件优化
+This limits how many messages are first rendered on the page; SillyTavern still reads the full chat file.
 
-`管理聊天文件请求加速` 只在普通角色聊天、空搜索、请求 `/api/chats/search` 时生效。扩展会先用轻量文件名列表渲染弹窗，再异步补齐文件大小、消息数、日期和预览文本。
+### Chat file manager optimizations
 
-`管理聊天文件滚动优化` 会对聊天文件行启用绘制隔离，缓解大量聊天文件时的滚动卡顿。
+`Faster chat file manager requests` applies only to regular character chats, empty searches and `/api/chats/search` requests. The dialog first renders a lightweight file name list, then fills in file size, message count, date and preview text asynchronously.
 
-`管理聊天文件关闭清理` 会在管理聊天文件窗口关闭后清空已生成的聊天文件 DOM，减少关闭后的页面负担。
+`Chat file manager scroll optimization` enables paint containment on chat file rows, easing scroll lag with many chat files.
 
-关键词搜索和群聊会自动回退到 SillyTavern 原始逻辑。
+`Chat file manager cleanup on close` clears the generated chat file DOM after the dialog closes, reducing the page's load afterwards.
 
-### 主页进入聊天优化
+Keyword searches and group chats fall back to SillyTavern's original logic automatically.
 
-启用 `主页进入聊天优化` 后，从欢迎页最近聊天进入普通角色聊天时，会直接打开被点击的聊天文件，避免先渲染角色上一次激活的聊天再切换到目标文件。
+### Home-to-chat optimization
 
-### 删楼后快速编辑
+With `Home-to-chat optimization` on, entering a regular character chat from the welcome page's recent chats opens the clicked chat file directly, instead of first rendering the character's last active chat and then switching.
 
-启用 `删楼后快速编辑` 后，通过 SillyTavern 删除消息模式删楼后，可以立即打开上一层编辑区。若此时点击发送、继续、冒充或重新生成，扩展会先提交当前快速打开的编辑区，再继续执行原动作。
+### Quick edit after deleting messages
 
-### 移动端输入与滚动
+With `Quick edit after deleting messages` on, after deleting messages in SillyTavern's delete mode you can open the previous message's editor immediately. If you then press send, continue, impersonate or regenerate, the extension first commits the quickly opened editor, then carries on with the original action.
 
-- `输入框响应优化`：减少移动端 resize 触发的自动补全和 hotswap 重算。
-- `禁止输入法自动弹出`：进入聊天、打开聊天文件管理、进入楼层编辑时拦截程序自动聚焦，手动点击输入框仍然可用。
-- `编辑楼层时禁用自动滚动`：抑制移动端键盘挤压布局造成的聊天区滚动补偿。
-- `双击编辑楼层` / `三击编辑楼层`：快速打开消息编辑器，两个开关互斥。
+### Mobile input and scrolling
 
-### 聊天保存请求 Gzip 压缩
+- `Input box responsiveness`: reduces autocomplete and hotswap recalculation triggered by resize on mobile.
+- `Stop keyboard auto-popup`: blocks programmatic auto-focus when entering a chat, opening the chat file manager or entering message edit; tapping the input by hand still works.
+- `Disable auto-scroll while editing a message`: suppresses the chat area scroll compensation caused by the mobile keyboard squeezing the layout.
+- `Double-click to edit message` / `Triple-click to edit message`: open the message editor quickly; the two switches are mutually exclusive.
 
-启用 `聊天保存请求 Gzip 压缩` 后，扩展会对公网访问下的 `/api/chats/save` 和 `/api/chats/group/save` 请求体进行 Gzip 压缩。本地地址和局域网地址会自动跳过；如果压缩请求失败，会自动用未压缩请求重试。
+### Gzip chat save requests
 
-### 消息完成提示音
+With `Gzip chat save requests` on, request bodies of `/api/chats/save` and `/api/chats/group/save` are Gzip-compressed when SillyTavern is accessed over the public internet. Local and LAN addresses are skipped automatically; if a compressed request fails, it is retried uncompressed.
 
-启用 `生成完成后播放提示音` 后，扩展会在消息生成正常结束时播放当前选择的提示音。手动停止生成时不会播放。
+### Message completion sound
 
-搭配黑名单自动重试时，提示音会等待黑名单检查完成：需要继续重试的中间回复不播放；最终通过检查，或总重试次数耗尽并保留最后回复时，只播放一次。即使最后回复仍命中黑名单，次数耗尽也会提示。关闭提示音开关后始终不自动播放；取消重试不会补响。
+With `Play a sound when generation finishes` on, the selected sound plays when message generation ends normally. It does not play when you stop generation by hand.
 
-提示音支持三种来源：
+Combined with blacklist auto-retry, the sound waits for the blacklist check: intermediate replies that will be retried do not play it; it plays once when the final reply passes the check, or when the total retries run out and the last reply is kept. Even if that last reply still hits the blacklist, running out of retries plays the sound. With the sound switch off it never plays automatically; cancelling a retry does not play it afterwards.
 
-- `内置音频`：使用扩展 `video` 目录里的内置音频。扩展加载时不会预加载全部音频，只会在试听或播放当前选中音频时加载对应文件。
-- `音频 URL`：直接把 URL 保存到扩展用户配置中，适合多个设备共用同一个 SillyTavern 服务端配置。
-- `本地文件`：上传后保存到当前浏览器的 IndexedDB，只在本机当前浏览器可用，不会写入 SillyTavern 用户配置。
+Three sound sources are supported:
 
-设置面板提供 `试听` 按钮和音量滑块，方便切换音频后直接确认效果。
+- `Built-in audio`: audio from the extension's `video` folder. Nothing is preloaded when the extension loads; only the selected file is loaded when previewed or played.
+- `Audio URL`: the URL is saved in the extension's user settings, suitable for several devices sharing one SillyTavern server configuration.
+- `Local file`: saved to this browser's IndexedDB after upload; available only in this browser on this device, never written to SillyTavern user settings.
 
-移动端可以开启 `生成中静音保活`。开启后，扩展会在消息生成期间循环播放一段内联静音音频，尽量降低浏览器切到后台后被冻结、导致完成提示音无法播放的概率。它只在移动端、提示音开启且正在生成时运行，可能增加少量耗电。
+The settings panel has a `Preview` button and a volume slider, so you can check the result right after switching audio.
 
-### 生成失败自动重试
+On mobile you can turn on `Silent keep-alive during generation`. While a message generates, the extension loops a short inline silent audio, lowering the chance that the browser is frozen in the background and the completion sound cannot play. It runs only on mobile, with the sound on, during generation, and may use slightly more battery.
 
-`生成失败自动重试` 设置区同时提供请求失败重试和 `黑名单命中自动重试`，两者独立开关，但共用 `最大重试次数`。报错重发和黑名单重新生成都计入同一轮总次数，不会因重新生成而重置。例如最大重试次数为 3，报错已重试 2 次后，黑名单只剩 1 次重试机会；手动发起新一轮生成才重新计数。
+### Auto-retry failed message generation
 
-黑名单每行一条：普通行按正文包含文本匹配，忽略英文大小写和空行；写成 `/正则/标志` 的行按正则匹配，例如 `/504|bad gateway/i`、`/^\[Error\]/m`。标志按浏览器支持的 JS 正则标志原样生效，常用 `g i m s u y`；正则不加 `i` 时区分大小写，`g`/`y` 只影响状态、不影响是否命中。无效正则和写不成合法 `/正则/标志` 形式的行（例如 `/foo/` 后带空格、`//`、`/foo/gi!`）按普通文本处理，无效正则在控制台提示一次。单聊普通生成和重新生成完成并收尾后，读取本轮最新助手楼层的正文，命中任一条就调用 ST 原生重新生成，替换命中回复，不增加候选回复或重复发送用户消息。默认每轮合计最多额外重试 3 次，可设为 1 到 10 次；黑名单重试间隔 1.5 秒，等待期间可用酒馆停止按钮取消。总次数耗尽仍命中时，停止重试、保留最后回复并提示，由用户决定后续处理。
+The `Auto-retry failed message generation` settings hold both request-failure retry and `Auto-retry on blacklist hit`. They are switched separately but share `Max retries`. Error resends and blacklist regenerations count toward the same per-round total, which is not reset by regenerating. For example, with max retries at 3, after 2 error retries the blacklist has only 1 retry left; only a new generation you start by hand resets the count.
 
-流式和非流式均支持；流式请求异常结束后，已显示的错误正文也会检查黑名单（例如 `HTTP 503 Service Unavailable`），不会把错误中止当成用户主动停止。不扫描历史聊天或独立思维链字段，不处理续写、候选回复、群聊和其他插件独立发起的辅助生成。开启 ST 原生自动切换回复时，本功能暂停以避免重复触发。命中黑名单的重试提示标题为 `黑名单命中自动重试`，与请求失败重试的 `生成失败自动重试` 分开展示。手动停止、切换聊天、编辑或切换当前生成楼层的候选回复、删除消息或修改黑名单设置会取消当前重试链；即使停止落在酒馆重建请求控制器的启动窗口里（停止事件已经发出、酒馆又拿着新控制器把这一代继续跑），这一代也不会重新武装重试，被打断的重试次数会继续沿用而不是清零；更新无关旧楼层不会取消。重试等待期间若聊天再次保存，会继续等保存收尾，不会直接丢掉这次重试。
+One blacklist entry per line: plain lines match if the reply text contains them, ignoring English case and empty lines; lines written as `/regex/flags` match as a regex, e.g. `/504|bad gateway/i`, `/^\[Error\]/m`. Flags apply as the browser's JS regex flags, commonly `g i m s u y`; without `i` the regex is case-sensitive, and `g`/`y` only affect state, not whether it matches. Invalid regexes and lines that are not a valid `/regex/flags` (e.g. `/foo/` followed by a space, `//`, `/foo/gi!`) are treated as plain text; an invalid regex is reported once in the console. After a regular single-chat generation or regeneration finishes and settles, the text of the round's latest assistant message is read; if any line matches, ST's native regenerate is called, replacing the matched reply without adding a swipe or resending the user message. By default at most 3 extra retries per round in total, settable from 1 to 10; blacklist retry delay is 1.5 seconds, and you can cancel with SillyTavern's Stop button while waiting. If it still matches when the total runs out, retrying stops, the last reply is kept and a notice is shown; what to do next is up to you.
 
-消息替换、后台任务清理和聊天保存沿用原生重新生成及现有后台模块的流程；黑名单模块不再自行删除、保存或回滚聊天。检测依赖当前页面运行，关闭页面后不会在服务端继续执行黑名单检测；流式内容也可能先显示再被替换，不能撤销其他插件已处理的内容。
+Streaming and non-streaming are both supported; after a streamed request ends abnormally, error text already shown is also checked against the blacklist (e.g. `HTTP 503 Service Unavailable`), and an error abort is not treated as a user stop. Chat history and the separate reasoning field are not scanned; continue, swipes, group chats and auxiliary generations started by other extensions are not handled. While ST's native auto-swipe is on, this feature pauses to avoid double triggers. Blacklist retry notices are titled `Auto-retry on blacklist hit`, separate from the request-failure `Auto-retry on generation failure`. Stopping by hand, switching chats, editing or switching swipes of the message being generated, deleting messages or changing blacklist settings cancels the current retry chain. Even if the stop lands in the start window where SillyTavern rebuilds the request controller (the stop event has fired, but SillyTavern carries on with a new controller), that generation does not re-arm retries, and the interrupted retry count carries over instead of resetting; updating unrelated older messages does not cancel. If the chat saves again while a retry is waiting, the retry waits for the save to finish instead of being dropped.
 
-## 角色与头像优化
+Message replacement, background task cleanup and chat saving follow native regenerate and the existing background module; the blacklist module no longer deletes, saves or rolls back the chat by itself. Detection depends on the page running; once the page closes, no blacklist detection continues on the server. Streamed content may also show first and then be replaced, and content already processed by other extensions cannot be undone.
 
-### 头像缩略图懒加载
+## Character and avatar optimizations
 
-启用 `头像缩略图懒加载` 后，角色列表、Persona 列表和欢迎页最近聊天会先用占位图渲染离屏头像，把真实 `/thumbnail` 地址暂存到 `data-*` 上。头像滚动到可视区域附近后再加载真实缩略图。
+### Lazy-load avatar thumbnails
 
-同时会给角色行、Persona 行和最近聊天行应用 `content-visibility`，并为图片设置 `loading="lazy"`、`decoding="async"` 和低优先级加载。浏览器不支持 `IntersectionObserver` 时，会自动退回原生懒加载提示。
+With `Lazy-load avatar thumbnails` on, the character list, persona list and welcome-page recent chats first render off-screen avatars with a placeholder and keep the real `/thumbnail` URL in `data-*`. The real thumbnail loads when the avatar scrolls near the visible area.
 
-### 角色搜索输入框优化
+`content-visibility` is also applied to character, persona and recent chat rows, and images get `loading="lazy"`, `decoding="async"` and low fetch priority. Browsers without `IntersectionObserver` fall back to native lazy-loading hints.
 
-启用 `角色搜索输入框优化` 后，扩展会在事件捕获阶段拦截角色搜索输入框的输入事件。中文拼音输入组合期间不会触发搜索，组合结束后再执行一次搜索，并额外加入 300ms 防抖，减少海量角色下的输入卡顿和 DOM 重绘。
+### Character search box optimization
 
-## 预设优化
+With `Character search box optimization` on, the extension intercepts input events of the character search box in the capture phase. No search runs during Chinese pinyin composition; one search runs after composition ends, with an extra 300 ms debounce, reducing input lag and DOM repaints with huge character counts.
 
-### 预设备份自动清理
+## Preset optimizations
 
-在柏宝箱的 `柏宝库` 页签中，`自动清理旧备份` 默认开启，已有的关闭设置不会被覆盖。每次成功创建备份都会检查数量，所有预设合计保留最新的 `普通备份保留数量` 份（默认 200），超限时从最旧的开始删除。
+### Preset backup auto-cleanup
 
-- 有备注的备份免自动清理、不占普通备份名额；清空备注后重新参与清理。列表分别显示普通和受保护的份数。
-- 开启后，成功备份时静默清理超限部分，不再弹出自动清理确认框。手动开启或调低已启用的上限仍会先确认，取消则保留原设置。升级、刷新页面本身不会触发删除。
-- 备份保存失败、列表或元数据异常时不删除；删除失败时停止本轮并提示，下次成功备份后重试。清理不删除预设本体。
-- 清理期间打开备注等备份操作对话框会暂停后续删除，下次成功备份后再检查。设置沿用 ST 用户设置保存。
-- 只调用柏宝库现有列表和删除接口，无需修改柏宝库。这是页面运行期间维护的数量上限，不是服务器磁盘配额；关闭页面、断网或多设备并发时可能暂时超限。跨设备修改备注与清理不具备原子保证，应先完成重要备份的备注保存，再开启清理。全局淘汰可能清空不常用预设的历史。
+In BaiBai Tools' `BaiBaoKu` tab, `Auto-clean old backups` is on by default; an existing "off" setting is not overwritten. Each successful backup checks the count; across all presets the newest `Regular backups to keep` (default 200) are kept, and over the limit the oldest are deleted first.
 
-### 切换预设快速刷新
+- Backups with a note are exempt from auto-cleanup and do not count toward the regular limit; clearing the note makes them eligible again. The list shows regular and protected counts separately.
+- When on, over-limit backups are cleaned silently on successful backup, with no confirmation popup. Turning it on by hand or lowering an enabled limit still asks first; cancelling keeps the old setting. Upgrading or reloading the page never triggers deletion by itself.
+- Nothing is deleted if a backup save fails or the list or metadata is abnormal; if a deletion fails, this round stops with a notice and retries after the next successful backup. Cleanup never deletes the presets themselves.
+- Opening a backup dialog such as notes during cleanup pauses further deletion until the next successful backup. The setting is saved with ST user settings.
+- Only BaiBaoKu's existing list and delete endpoints are used; BaiBaoKu needs no changes. This is a count limit maintained while the page runs, not a server disk quota; with the page closed, offline, or with several devices at once, the limit may be exceeded temporarily. Editing notes and cleaning up across devices is not atomic; save notes on important backups before turning cleanup on. Global eviction may clear the history of rarely used presets.
 
-启用 `切换预设快速刷新` 后，OpenAI / Chat Completion 预设切换时会先让移动端下拉框收起，再尽早渲染 prompt 列表，并把 Token 统计刷新放到列表显示之后执行。删除当前预设时，会自动选择下一项，删除最后一项时选择第一项。
+### Fast refresh on preset switch
 
-### 预设界面折叠
+With `Fast refresh on preset switch` on, switching OpenAI / Chat Completion presets first closes the mobile dropdown, then renders the prompt list as early as possible and refreshes token counts after the list shows. Deleting the current preset selects the next one; deleting the last one selects the first.
 
-`预设界面折叠` 默认开启。启用后，扩展会把 OpenAI 预设界面中不常用的设置块收进 `预设设置` 折叠区，减少预设页纵向占用。关闭后会把这些设置块还原到原位置。
+### Preset panel collapse
 
-### 预设条目拖拽优化
+`Preset panel collapse` is on by default. It moves rarely used setting blocks of the OpenAI preset panel into a `Preset settings` collapsible section, reducing the panel's height. Turning it off puts the blocks back where they were.
 
-启用 `预设条目拖拽优化` 后，扩展会绕过原生 jQuery UI sortable 的实时挤压布局。拖拽时原条目保留占位，浮动克隆跟随指针，只显示插入线，松手后再保存顺序。
+### Preset entry drag optimization
 
-移动端默认只允许长按左侧拖拽手柄；启用 `手机预设条目整条拖拽` 后，可以长按整条非按钮区域开始拖拽。正常滚动会取消待开始的拖拽，减少误触。
+With `Preset entry drag optimization` on, the extension bypasses native jQuery UI sortable's live squeeze layout. While dragging, the original entry keeps its space, a floating clone follows the pointer, only an insertion line shows, and the order is saved on release.
 
-### 预设快速操作
+On mobile only the drag handle on the left can be long-pressed by default; with `Drag whole preset entry on mobile` on, any non-button area of the entry can be long-pressed to start dragging. Normal scrolling cancels a pending drag, reducing mistakes.
 
-启用 `预设快速操作` 后，已有 prompt 条目的启用/禁用和保存只更新当前行，并延迟刷新 Token 统计，避免每次操作都重建整份列表。新建 prompt 仍使用 SillyTavern 原始逻辑。
+### Fast preset actions
 
-### 预设收藏
+With `Fast preset actions` on, enabling/disabling and saving existing prompt entries updates only that row and defers the token count refresh, so the whole list is not rebuilt on every action. Creating a new prompt still uses SillyTavern's original logic.
 
-启用 `预设分组` 后，prompt 条目可以用三点菜单里的星标收藏。已收藏条目会在列表标题分隔线下方的 `收藏` 区域显示为快捷镜像，只提供启用/禁用和编辑入口，不参与拖拽排序、分组归属、复制或删除。已收藏条目会常驻星标快捷按钮；收藏区域支持展开/收起，收起动画结束后会卸载内部条目以减少列表 DOM。
+### Preset favorites
 
-### 预设内容 CodeMirror 编辑器
+With `Preset groups` on, prompt entries can be starred from the three-dot menu. Starred entries appear as shortcut mirrors in the `Favorites` area below the list header divider; they offer only enable/disable and edit, and take no part in drag ordering, group membership, copying or deleting. Starred entries keep a star shortcut button; the favorites area can expand and collapse, and unmounts its entries after the collapse animation to reduce list DOM.
 
-启用 `预设内容 CodeMirror 编辑器` 后，扩展会用 CodeMirror 替代 OpenAI prompt 条目内容 textarea，包括 SillyTavern 的放大编辑器。保存前会同步回原始表单字段；如果 CodeMirror 加载失败，会恢复原始 textarea。
+### CodeMirror editor for preset content
 
-`保存条目后自动保存预设` 默认关闭。开启后，保存 prompt 条目编辑时会额外触发当前 OpenAI 预设保存。
+With `CodeMirror editor for preset content` on, CodeMirror replaces the OpenAI prompt entry content textarea, including SillyTavern's expanded editor. Content syncs back to the original form field before saving; if CodeMirror fails to load, the original textarea is restored.
 
-### Tokenizer 计数请求批量加速
+`Auto-save preset after saving an entry` is off by default. When on, saving a prompt entry edit also triggers a save of the current OpenAI preset.
 
-当柏宝库可用且启用 `Tokenizer 计数请求批量加速` 时，Prompt Manager 刷新 Token 统计会调用柏宝库批量计数接口，减少切换模型或刷新预设时的大量单条计数请求。接口不可用时会回退到原始 Token 统计流程。
+### Batched tokenizer count requests
 
-## 正则优化列表
+When BaiBaoKu is available and `Batched tokenizer count requests` is on, Prompt Manager token count refreshes call BaiBaoKu's batch count endpoint, reducing the many single count requests when switching models or refreshing presets. If the endpoint is unavailable, the original token count flow is used.
 
-启用 `正则快速操作` 后，扩展会用 Vue 管理器接管全局、预设和角色正则列表。
+## Regex list optimizations
 
-主要能力：
+With `Fast regex actions` on, a Vue manager takes over the global, preset and character regex lists.
 
-- 单条正则启用/禁用、编辑保存、删除时只更新受影响条目
-- 支持正则条目拖拽排序、跨分组移动和保存分组归属
-- 支持创建、重命名、删除、折叠正则分组
-- 支持整组正则一键启用或禁用
-- 支持上移/下移调整分组排序，未分组会保留默认兜底组
-- 支持批量选择、批量启用/禁用、批量移动、批量删除和批量导出
-- 支持把选中的正则批量移动到全局、预设或角色正则
-- 导入正则后同步 Vue 列表和分组元数据
-- 预设正则分组会写入预设扩展字段，并随整份预设导出、导入和重命名
-- 正则保存会进入待保存队列，在面板关闭或页面生命周期事件中统一 flush，减少连续操作时的重复保存和重载
+Main capabilities:
 
-## 世界书与编辑器优化
+- Enabling/disabling, saving and deleting a single regex updates only the affected entry
+- Drag ordering of regex entries, moving across groups and saving group membership
+- Create, rename, delete and collapse regex groups
+- Enable or disable a whole group in one click
+- Move groups up/down; ungrouped entries keep a default fallback group
+- Bulk select, bulk enable/disable, bulk move, bulk delete and bulk export
+- Bulk move selected regexes to global, preset or character regexes
+- After importing regexes, the Vue list and group metadata are synced
+- Preset regex groups are written into the preset's extension field and travel with export, import and rename of the whole preset
+- Regex saves go into a pending queue and are flushed together when the panel closes or on page lifecycle events, reducing repeated saves and reloads during rapid edits
 
-### 原版世界书优化与世界书新布局
+## World Info and editor optimizations
 
-启用 `原版世界书优化` 后，世界书原版交互会延迟初始化较重的 Select2 控件、角色过滤选项和宏补全相关逻辑。启用 `世界书新布局` 后，插件会使用 Vue 接管世界书条目列表，并在新布局中使用更轻量的 transform 展开动画。
+### Native World Info optimization and new World Info layout
 
-### 自定义 CSS 编辑优化
+With `Native World Info optimization` on, native World Info interactions initialize heavy Select2 controls, character filter options and macro autocomplete logic lazily. With `New World Info layout` on, a Vue list takes over the World Info entry list, with lighter transform-based expand animations.
 
-`自定义CSS CodeMirror 编辑器` 会用 CodeMirror 接管用户设置里的自定义 CSS 编辑区，并在离开编辑器或页面生命周期事件中再同步和应用样式，减少输入期间的样式重算。
+### Custom CSS editing optimizations
 
-`切换美化优化` 会拦截原生 `#customCSS` 的长文本写入，把值重定向到 JavaScript 内存属性，从物理层面避免浏览器因为向原生 textarea 写入大段 CSS 而触发布局和绘制卡顿。开启此项会自动开启自定义 CSS CodeMirror 编辑器。
+`CodeMirror editor for custom CSS` takes over the custom CSS editor in user settings with CodeMirror, and syncs and applies styles when you leave the editor or on page lifecycle events, reducing style recalculation while typing.
 
-移动端切换美化后切到后台再返回时，扩展会以 SillyTavern 当前主题的 `power_user.custom_css` 为准，重新校准 `#custom-style`、原生 textarea、CodeMirror 文档和 Shadow Property，避免新旧美化 CSS 混合残留。
+`Theme switch optimization` intercepts long text writes to the native `#customCSS`, redirecting the value to an in-memory JavaScript property, so the browser never lays out and paints large CSS written into a native textarea. Turning it on also turns on the custom CSS CodeMirror editor.
 
-### 角色描述 CodeMirror 编辑器
+When switching themes on mobile, going to the background and coming back, the extension takes SillyTavern's current theme `power_user.custom_css` as the truth and re-aligns `#custom-style`, the native textarea, the CodeMirror document and the shadow property, avoiding leftover mixes of old and new theme CSS.
 
-启用 `角色描述 CodeMirror 编辑器` 后，角色描述长文本区域会替换为轻量 CodeMirror 6 编辑器。加载失败时会恢复 SillyTavern 原始输入框。
+### CodeMirror editor for character description
 
-## 柏宝库分页与加速
+With `CodeMirror editor for character description` on, the character description text area is replaced with a lightweight CodeMirror 6 editor. If it fails to load, SillyTavern's original input is restored.
 
-柏宝库相关开关位于扩展设置的 `柏宝库` 标签页。面板会显示服务、数据库驱动和 Early Bridge 状态，并提供手动刷新按钮。
+## BaiBaoKu paging and acceleration
 
-这些功能依赖柏宝库接口或 Early Bridge；不可用时会自动回退到 SillyTavern 原生接口。
+BaiBaoKu switches are in the `BaiBaoKu` tab of the extension settings. The panel shows the service, database driver and Early Bridge status, with a manual refresh button.
 
-- `Settings get/save 加速`：通过柏宝库 Early Bridge 接管 `/api/settings/get` 和 `/api/settings/save`。
-- `扩展 Manifest 合并请求`：启动加载扩展时一次性获取扩展清单和 manifest 缓存，减少大量 `/scripts/extensions/.../manifest.json` 请求；安装、更新、移动和切分支后只重新获取被操作扩展的 manifest。
-- `角色列表请求加速`：把空请求的 `/api/characters/all` 替换为柏宝库快速角色列表接口。
-- `最近聊天请求加速`：把主页 `/api/chats/recent` 替换为柏宝库快速最近聊天接口。
-- `美化主题懒加载`：切换美化主题时按需读取目标主题配置，显示加载状态，并在加载完成后再应用主题。
-- `消息后台生成`：普通单角色 Chat Completion 生成改用柏宝库 save-generate，生成完成后由后端写入聊天文件。
-- `Tokenizer 计数请求批量加速`：Prompt Manager Token 统计使用柏宝库批量计数接口。
+These features depend on BaiBaoKu's endpoints or Early Bridge; when unavailable they fall back to SillyTavern's native endpoints.
 
-### 美化主题懒加载
+- `Faster settings get/save`: takes over `/api/settings/get` and `/api/settings/save` through BaiBaoKu Early Bridge.
+- `Merged extension manifest request`: at startup, fetches the extension list and manifest cache in one go, cutting the many `/scripts/extensions/.../manifest.json` requests; after install, update, move or branch switch, only the affected extension's manifest is fetched again.
+- `Faster character list request`: replaces the empty `/api/characters/all` request with BaiBaoKu's fast character list endpoint.
+- `Faster recent chats request`: replaces the home page's `/api/chats/recent` with BaiBaoKu's fast recent chats endpoint.
+- `Lazy-load themes`: when switching themes, reads the target theme's configuration on demand, shows a loading state, and applies the theme once loaded.
+- `Background message generation`: regular single-character Chat Completion generation uses BaiBaoKu save-generate; the backend writes to the chat file when generation finishes.
+- `Batched tokenizer count requests`: Prompt Manager token counts use BaiBaoKu's batch count endpoint.
 
-启用柏宝库 Settings 加速且 Early Bridge 可用时，切换美化主题会先拦截原生主题下拉框变更，再通过柏宝库按主题名读取目标主题配置。加载期间会显示“正在加载美化主题...”状态，避免用户误以为页面卡住。
+### Lazy-load themes
 
-主题配置加载成功后，扩展会同步 SillyTavern 的主题字段、颜色绑定、聊天显示方式和 Toastr 位置，并保存设置；如果加载失败，会回退到原来的主题选择并显示错误提示。这个流程只针对主题切换，不改变自定义 CSS 编辑器本身的保存方式。
+With BaiBaoKu settings acceleration on and Early Bridge available, switching themes first intercepts the native theme dropdown change, then reads the target theme's configuration by name through BaiBaoKu. While loading, a "Loading theme..." status shows so users do not think the page has frozen.
 
-### 消息后台生成
+Once the theme configuration loads, the extension syncs SillyTavern's theme fields, color bindings, chat display mode and Toastr position, and saves settings; if loading fails, it falls back to the previous theme selection and shows an error. This flow only covers theme switching and does not change how the custom CSS editor saves.
 
-启用 `消息后台生成` 后，普通单角色 Chat Completion 的 `normal` 和 `regenerate` 回复会走柏宝库 save-generate 接口。前端仍按 SillyTavern 原流程发起生成，但后端会在生成完成后直接把 AI 回复写入当前聊天文件，避免手机浏览器切后台、刷新或断线导致“前端拿到回复但还没来得及保存”的丢失场景。
+### Background message generation
 
-流式生成仍会把内容实时返回给前端显示；非流式生成会等待后端生成完成后返回。生成成功并已由后端保存时，扩展会跳过原本紧随其后的 `/api/chats/save`，减少重复保存。刷新后如果发现当前聊天还有后台生成任务，扩展会用 jobId 恢复状态；任务完成后会用 SillyTavern 的消息插入流程恢复楼层，尽量触发正常的消息渲染事件。
+With `Background message generation` on, `normal` and `regenerate` replies of regular single-character Chat Completion use BaiBaoKu's save-generate endpoint. The front end still starts generation through SillyTavern's normal flow, but the backend writes the AI reply straight into the current chat file when generation finishes, avoiding the loss case where a mobile browser backgrounds, reloads or disconnects after the front end got the reply but before it saved.
 
-支持 OpenAI / Custom 来源中单个 `emit_complete_response` 或 `emit_complete_response_<字母数字后缀>` 工具承载完整回复：保留上游请求的工具定义，后端把工具参数 JSON 的 `content` 转为普通 AI 正文，前端显示和后台保存使用同一份内容。工具参数分片会等收齐并校验后一次显示正文；普通文本回复仍实时显示，包括代理返回的错误正文。不执行通用工具调用，也不接管混合多个工具的请求。
+Streaming generation still returns content to the front end live; non-streaming waits for the backend to finish. When generation succeeds and the backend has saved it, the extension skips the `/api/chats/save` that would normally follow, avoiding a duplicate save. After a reload, if the current chat still has a background generation job, the extension restores its state by jobId; when the job finishes, the message is restored through SillyTavern's message insert flow, firing the normal render events where possible.
 
-后台接管与请求重试通过本轮主生成的一次性请求标记关联，不再比较整份请求体、计算内容指纹或维护带匹配超时的意图队列。预设脚本在 `CHAT_COMPLETION_SETTINGS_READY` 之后克隆 JSON、调整采样参数或提示词、加入上述防截断工具时，只要保留该标记，就仍能识别为同一次生成；实际发出的请求保留脚本改写后的内容。标记只在页面请求链中传递，由内层请求钩子在发送前移除，不写入 KV，也不传给柏宝库后端或远端 API。即使关闭自动重试或回退原生接口，也会移除标记。
+A single `emit_complete_response` or `emit_complete_response_<alphanumeric suffix>` tool carrying the full reply is supported for OpenAI / Custom sources: the upstream request's tool definition is kept, the backend turns the `content` of the tool-argument JSON into normal AI text, and the front-end display and background save use the same content. Tool-argument chunks are shown once all have arrived and been validated; plain text replies still stream live, including error text returned by a proxy. General tool calls are not executed, and requests mixing several tools are not taken over.
 
-参数准备事件只绑定本轮请求标记，不提前按工具列表、来源或候选数拒绝绑定；这些兼容性检查统一放在 fetch 接到最终请求时执行，避免后续预设脚本修正配置后仍漏接管。未绑定时，日志会区分事件未收到、生成类型不一致、准备期间切换聊天或关闭功能等原因，不输出提示词和密钥。
+Background takeover and request retry are linked through a one-time request marker for this round's main generation, instead of comparing whole request bodies, hashing content or keeping an intent queue with match timeouts. When a preset script clones the JSON after `CHAT_COMPLETION_SETTINGS_READY`, adjusts sampling parameters or prompts, or adds the anti-truncation tool above, it is still recognised as the same generation as long as the marker is kept; the request actually sent keeps the script's changes. The marker only travels in the page's request chain and is removed by the inner request hook before sending; it is not written to KV or passed to the BaiBaoKu backend or remote APIs. It is removed even with auto-retry off or when falling back to native endpoints.
 
-标记随新一轮生成替换，请求认领一次即清除，生成结束、停止或切换聊天时失效；不会因预处理耗时超过 60／120 秒就匹配失败。没有标记、标记属于其他生成、聊天状态不符或含不支持的工具时仍保守回退，不会仅凭接口 URL 接管辅助请求；控制台会给出具体跳过原因。请求一旦发出，断线或丢失响应不会再回退原生接口重复生成。
+The settings-ready event binds only this round's request marker and does not reject binding early based on tool lists, source or swipe count; those compatibility checks all run when fetch receives the final request, so takeover is not missed after later preset scripts correct the configuration. When not bound, logs distinguish event not received, generation type mismatch, chat switched during preparation, feature turned off and similar reasons, without printing prompts or keys.
 
-此兼容需要柏宝库后端 `0.6.4` 或以上，并重启 SillyTavern、刷新页面后生效；旧后端不声明对应能力时会保留原生生成，不发送不兼容的后台任务。
+The marker is replaced with each new generation, cleared once a request claims it, and expires when generation ends, stops or the chat switches; matching does not fail because preprocessing took more than 60/120 seconds. Without a marker, with a marker from another generation, with a mismatched chat state or unsupported tools, it still falls back conservatively and never takes over auxiliary requests based on URL alone; the console gives the specific skip reason. Once a request is sent, a disconnect or lost response does not fall back to native generation again, avoiding duplicates.
 
-后端状态面板和生成模块同步缓存在线状态与工具能力；只有在线标记而没有能力结果时，会补查状态，避免刷新后的加载顺序影响后台接管。
+This compatibility needs BaiBaoKu backend `0.6.4` or later, effective after restarting SillyTavern and reloading the page; older backends that do not declare the capability keep native generation and receive no incompatible background jobs.
 
-暂停 SillyTavern 原生生成按钮会同时取消当前活跃的 save-generate job。取消时会丢弃后端已经生成但尚未保存的部分内容；API 服务明确返回错误时，前端会保留 SillyTavern 原生报错体验，刷新后不会重复提示本页已经收到过的同一个失败 job。
+The backend status panel and the generation module share a cache of online status and tool capability; when only the online flag is known without a capability result, status is queried again, so load order after a reload does not affect background takeover.
 
-### 聊天记录分批进入
+SillyTavern's native stop button also cancels the active save-generate job. Cancelling discards content the backend generated but has not saved yet; when the API service returns an explicit error, the front end keeps SillyTavern's native error experience, and after a reload the same failed job already seen on this page is not reported again.
 
-`聊天记录分批进入` 目前已禁用，柏宝库面板中的 `长聊天分批加载` 开关会保持关闭且不可点击，后端 fast-get 接口也会拒绝启用。进入聊天会继续使用 SillyTavern 原生完整聊天读取流程。
+### Long chat batch loading
 
-历史版本中启用该功能后，访问大聊天时会先请求尾部楼层，让页面尽快进入可读状态。完整聊天会在后台继续补全，补全完成后同步 SillyTavern 的聊天数组、校正楼层 ID、恢复滚动位置，并触发必要的聊天加载事件。
+`Long chat batch loading` is currently disabled. The `Long chat batch loading` switch in the BaiBaoKu panel stays off and cannot be clicked, and the backend fast-get endpoint refuses to enable it. Entering a chat keeps using SillyTavern's native full chat read.
 
-补全期间会临时拦截发送、编辑、删除、切换楼层和保存等操作，并提示“长聊天分批加载: 剩余批次还未加载完成，先不要进行操作”。保存请求会被跳过并返回前端成功响应，避免 SillyTavern 额外弹出通用连接错误。如果柏宝库完整补全失败，会尝试用 SillyTavern 原生聊天读取接口补全；状态过期或聊天切换时会停止本次补全。
+In older versions, with this feature on, opening a large chat first requested the last messages so the page became readable quickly. The full chat was completed in the background; afterwards SillyTavern's chat array was synced, message IDs corrected, scroll position restored and the necessary chat load events fired.
 
-## 其他优化
+While completing, send, edit, delete, swipe and save were temporarily blocked with the notice "Long chat batch loading: The remaining batches have not finished loading; please wait before doing anything". Save requests were skipped and answered with a front-end success response, so SillyTavern did not show a generic connection error. If BaiBaoKu's full completion failed, SillyTavern's native chat read was tried; completion stopped when the state expired or the chat switched.
 
-### 翻译更新事件保存优化
+## Other optimizations
 
-启用 `翻译更新事件保存优化` 后，当自动翻译关闭且消息没有翻译缓存时，扩展会跳过翻译扩展在 `MESSAGE_UPDATED` 事件里的无效处理，避免长聊天编辑消息后反复触发全量保存。
+### Translate update event save optimization
 
-如果自动翻译开启，或消息已经有翻译显示缓存，翻译扩展的原逻辑仍会执行。
+With `Translate update event save optimization` on, when auto-translate is off and a message has no translation cache, the extension skips the translate extension's useless handling in the `MESSAGE_UPDATED` event, avoiding repeated full saves after editing messages in long chats.
 
-### 更新提示
+If auto-translate is on, or the message already has a cached translation display, the translate extension's original logic still runs.
 
-`检测到更新弹窗提示` 开启后，扩展检测到可用更新时会弹出确认提示。关闭后仍会显示 `new` 标记和更新按钮。
+### Update notice
 
-## 安装
+With `Popup on available update` on, a confirmation popup shows when an update is available. When off, the `new` badge and update button still show.
 
-本地测试时，扩展目录可以放在：
+## Installation
 
-```text
-public/scripts/extensions/third-party/SillyTavern-Mobile-Resize-Guard
+SillyTavern → Extensions → Install extension, and enter:
+
+```
+https://github.com/fadust/ST-BaiBai-Tools-en
 ```
 
-如果要通过 SillyTavern 第三方扩展安装器安装，请把本目录内容发布到单独仓库的根目录，确保 `manifest.json` 位于仓库根目录。
+Do not install this alongside the original Chinese version. The in-app update check points to this English repository.
 
-## 开发与构建
+For local testing, the extension folder can also be placed in `public/scripts/extensions/third-party/`.
 
-源码位于 `src/`，运行时加载的是 Vite 构建产物 `dist/index.js`（`manifest.json` 的 `js` 字段指向 `dist/index.js?ver=版本号`，版本号由 `scripts/sync-version.mjs` 从 `package.json` 同步）。修改 `src/` 后需要重新构建才会生效：
+## Development and build
+
+Source is in `src/`; at runtime the Vite build output `dist/index.js` is loaded (`manifest.json`'s `js` field points to `dist/index.js?ver=<version>`, synced from `package.json` by `scripts/sync-version.mjs`). After changing `src/`, rebuild for it to take effect:
 
 ```bash
 npm install
-npm run build        # 生产构建（含 sourcemap 与压缩）
-npm run watch        # 开发监听构建
-npx eslint src       # 静态检查(no-undef 等)
+npm run build        # production build (with sourcemap and minification)
+npm run watch        # development watch build
+npx eslint src       # static checks (no-undef etc.)
 ```
 
-源码目录结构：
+Source layout:
 
 ```text
 src/
-  index.js                入口：模块装配与顶层接线
-  features/               原 index.js 拆分出的功能模块(主题、自定义CSS、正则、后台生成等)
-  preset/                 预设优化(原 presetOptimizations.js 拆分,index.js 为公共出口)
-  chat/                   聊天优化(原 chatOptimizations.js 拆分)
-  worldinfo/              世界书页面优化(原 worldInfoPageOptimization.js 拆分)
-  floorDirectory.js       楼层管理器
-  saveGenerateDisplay.js  后台生成展示组件
-  settings.html           设置面板模板(构建时经 ?raw 内联)
+  index.js                entry: module wiring and top-level hookup
+  features/               feature modules split out of the old index.js (theme, custom CSS, regex, background generation, etc.)
+  preset/                 preset optimizations (split from presetOptimizations.js; index.js is the shared export)
+  chat/                   chat optimizations (split from chatOptimizations.js)
+  worldinfo/              World Info page optimizations (split from worldInfoPageOptimization.js)
+  floorDirectory.js       message manager
+  saveGenerateDisplay.js  background generation display component
+  settings.html           settings panel template (inlined at build via ?raw)
 ```
 
-宿主 SillyTavern 模块通过 `@sillytavern/*` 别名引用（如 `@sillytavern/script`、`@sillytavern/scripts/utils`），构建时解析为相对路径并保持 external，不会被打进产物。Vue、vue-draggable-next 与 CodeMirror 由 npm 依赖打包，全部内联进单个 `dist/index.js`（云端/高延迟环境下单个大文件比多个懒加载 chunk 加载更快）。
+Host SillyTavern modules are referenced through `@sillytavern/*` aliases (e.g. `@sillytavern/script`, `@sillytavern/scripts/utils`), resolved to relative paths at build time and kept external, so they are not bundled. Vue, vue-draggable-next and CodeMirror are bundled from npm dependencies, all inlined into a single `dist/index.js` (one large file loads faster than many lazy chunks in cloud/high-latency setups).
 
-发版流程：改 `package.json` 的 `version` → `npm run build`（prebuild 自动同步 `manifest.json` 并刷新 `?ver=` 缓存参数）→ 提交 `src/`、`dist/` 与 `manifest.json`。
+Release flow: change `version` in `package.json` → `npm run build` (prebuild syncs `manifest.json` and refreshes the `?ver=` cache parameter) → commit `src/`, `dist/` and `manifest.json`.
 
-## 兼容与回退
+## Compatibility and fallbacks
 
-- 大多数优化都可以在扩展设置面板中单独开关。
-- 依赖柏宝库的功能会检测接口状态；接口不可用、返回异常或不满足条件时会回退到 SillyTavern 原生行为。
-- 聊天文件请求加速只处理普通角色空搜索；群聊和关键词搜索保持原生行为。
-- CodeMirror 相关编辑器加载失败时会恢复原生 textarea。
-- Gzip 保存请求仅在公网访问时启用，并在失败时自动改用未压缩请求重试。
-- 消息完成提示音的内置音频按需加载；URL 音频能否播放取决于浏览器支持和远端访问情况；本地文件仅保存在当前浏览器；移动端静音保活只能提高后台播放成功率，无法绕过系统强制休眠、浏览器杀后台或省电策略。
+- Most optimizations can be switched on or off individually in the extension settings panel.
+- Features depending on BaiBaoKu check endpoint status; when the endpoint is unavailable, returns errors or conditions are not met, SillyTavern's native behavior is used.
+- Faster chat file requests only handle empty searches for regular characters; group chats and keyword searches keep native behavior.
+- CodeMirror editors restore the native textarea if they fail to load.
+- Gzip save requests are used only over the public internet and retry uncompressed on failure.
+- Built-in completion sounds load on demand; whether a URL sound plays depends on browser support and remote access; local files are stored only in this browser; mobile silent keep-alive only raises the chance of background playback and cannot bypass forced system sleep, browsers killing background tabs or power-saving policies.

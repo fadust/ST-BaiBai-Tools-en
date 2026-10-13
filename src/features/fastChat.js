@@ -219,7 +219,7 @@ function notifyFastChatGetBlocked() {
 
     state.lastNoticeAt = now;
     if (globalThis.toastr?.info) {
-        globalThis.toastr.info('剩余批次还未加载完成，先不要进行操作', '长聊天分批加载:');
+        globalThis.toastr.info('The remaining batches have not finished loading; please wait before doing anything', 'Long chat batch loading:');
     }
 }
 
@@ -404,7 +404,7 @@ function beginFastChatHydration(fetchFn, requestInfo, input, init, data) {
         .catch((error) => {
             console.warn(`${LOG_PREFIX} Fast chat hydration failed`, error);
             if (getFastChatGetState().current?.requestId === hydration.requestId && globalThis.toastr?.error) {
-                globalThis.toastr.error('聊天记录补全失败，请重新进入当前聊天。', '柏宝库');
+                globalThis.toastr.error('Failed to complete the chat history; re-enter the current chat.', 'BaiBaoKu');
             }
         });
 }
@@ -437,7 +437,7 @@ async function hydrateFastChatInBackground(fetchFn, input, init, hydration) {
         if (getFastChatGetState().current?.requestId === hydration.requestId) {
             clearFastChatHydration(hydration.requestId);
             if (globalThis.toastr?.warning) {
-                globalThis.toastr.warning('聊天记录补全状态已过期，请重新进入当前聊天。', '柏宝库');
+                globalThis.toastr.warning('Chat history completion state has expired; re-enter the current chat.', 'BaiBaoKu');
             }
         }
         return;

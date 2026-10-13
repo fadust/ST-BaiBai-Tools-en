@@ -528,8 +528,8 @@ function renderRegexVueListToolbar(h, model, list) {
                 hasSelectedScripts ? '' : 'disabled',
             ],
             title: hasSelectedScripts
-                ? t`将已选正则移动到分组`
-                : t`先选择要移动的正则`,
+                ? t`Move selected regexes to a group`
+                : t`Select the regexes to move first`,
             onClick: () => {
                 if (!hasSelectedScripts) {
                     toastr.warning(t`No regex scripts selected for moving.`);
@@ -540,7 +540,7 @@ function renderRegexVueListToolbar(h, model, list) {
             },
         }, [
             h('i', { class: 'fa-solid fa-folder-tree margin-r5' }),
-            h('span', null, t`移动到分组...`),
+            h('span', null, t`Move to group...`),
         ]),
     ]);
 }

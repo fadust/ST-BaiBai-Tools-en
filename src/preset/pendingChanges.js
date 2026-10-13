@@ -316,7 +316,7 @@ async function confirmSavePendingPresetChangesBeforeExport(exportButton) {
     extensionState.presetExportPendingChangesPromptOpen = true;
 
     try {
-        const confirmed = await callGenericPopup(t`当前预设有未保存的更改。要先保存后再导出吗？`, POPUP_TYPE.CONFIRM);
+        const confirmed = await callGenericPopup(t`The current preset has unsaved changes. Save before exporting?`, POPUP_TYPE.CONFIRM);
 
         if (!confirmed) {
             return;

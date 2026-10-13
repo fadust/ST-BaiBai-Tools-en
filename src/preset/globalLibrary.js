@@ -225,15 +225,15 @@ function renderPresetVuePromptGlobalLibrary(h, vueDraggableNext, item, { outside
         }
 
         if (item.loading) {
-            return [h('div', { class: 'bai-bai-preset-global-library-empty' }, t`全局库加载中...`)];
+            return [h('div', { class: 'bai-bai-preset-global-library-empty' }, t`Loading global library...`)];
         }
 
         if (item.error) {
-            return [h('div', { class: 'bai-bai-preset-global-library-empty' }, t`全局库加载失败`)];
+            return [h('div', { class: 'bai-bai-preset-global-library-empty' }, t`Failed to load global library`)];
         }
 
         if (item.count === 0 && !item.hasGroups) {
-            return [h('div', { class: 'bai-bai-preset-global-library-empty' }, t`暂无全局条目`)];
+            return [h('div', { class: 'bai-bai-preset-global-library-empty' }, t`No global entries yet`)];
         }
 
         const sections = [];
@@ -268,7 +268,7 @@ function renderPresetVuePromptGlobalLibrary(h, vueDraggableNext, item, { outside
                 togglePresetVuePromptGlobalLibraryCollapsed();
             },
         }, [
-            h('span', { class: 'bai-bai-preset-group-title', title: t`全局库` }, [
+            h('span', { class: 'bai-bai-preset-group-title', title: t`Global library` }, [
                 h('span', {
                     class: [
                         'menu_button',
@@ -276,10 +276,10 @@ function renderPresetVuePromptGlobalLibrary(h, vueDraggableNext, item, { outside
                         'fa-solid',
                         'fa-chevron-down',
                     ],
-                    title: item.collapsed ? t`展开全局库` : t`收起全局库`,
+                    title: item.collapsed ? t`Expand global library` : t`Collapse global library`,
                 }),
                 h('span', { class: 'bai-bai-preset-group-title-content' }, [
-                    h('strong', null, t`全局库`),
+                    h('strong', null, t`Global library`),
                     h('small', { class: 'bai-bai-preset-group-count' }, `(${item.count})`),
                 ]),
             ]),
@@ -287,7 +287,7 @@ function renderPresetVuePromptGlobalLibrary(h, vueDraggableNext, item, { outside
                 renderPresetVuePromptActionButton(h, {
                     action: 'global-library-new-group',
                     icon: 'fa-folder-plus',
-                    text: t`新建分组`,
+                    text: t`New group`,
                     onClick: event => {
                         event.stopPropagation();
                         handlePresetPromptActionButtonClick(event);
@@ -296,7 +296,7 @@ function renderPresetVuePromptGlobalLibrary(h, vueDraggableNext, item, { outside
                 renderPresetVuePromptActionButton(h, {
                     action: 'global-library-toggle-select',
                     icon: selecting ? 'fa-square-check' : 'fa-list-check',
-                    text: selecting ? t`退出多选` : t`多选`,
+                    text: selecting ? t`Exit multi-select` : t`Multi-select`,
                     extraClasses: selecting ? ['bai-bai-preset-global-library-select-active'] : [],
                     onClick: event => {
                         event.stopPropagation();
@@ -318,24 +318,24 @@ function renderPresetVueGlobalLibrarySelectionBar(h, item) {
     const selectedCount = item.selectedCount ?? 0;
 
     return h('div', { class: 'bai-bai-preset-global-library-selection-bar', key: 'global-library-selection-bar' }, [
-        h('span', { class: 'bai-bai-preset-global-library-selection-count' }, `${t`已选`} ${selectedCount}`),
+        h('span', { class: 'bai-bai-preset-global-library-selection-count' }, `${t`Selected`} ${selectedCount}`),
         h('span', { class: 'bai-bai-preset-global-library-selection-actions' }, [
             renderPresetVuePromptActionButton(h, {
                 action: 'global-library-insert-selected',
                 icon: 'fa-plus',
-                text: t`添加选中到当前预设`,
+                text: t`Add selected to current preset`,
                 onClick: event => handlePresetPromptActionButtonClick(event),
             }),
             renderPresetVuePromptActionButton(h, {
                 action: 'global-library-move-selected',
                 icon: 'fa-folder-tree',
-                text: t`移动选中到分组`,
+                text: t`Move selected to group`,
                 onClick: event => handlePresetPromptActionButtonClick(event),
             }),
             renderPresetVuePromptActionButton(h, {
                 action: 'global-library-delete-selected',
                 icon: 'fa-trash',
-                text: t`删除选中`,
+                text: t`Delete selected`,
                 caution: true,
                 onClick: event => handlePresetPromptActionButtonClick(event),
             }),
@@ -443,7 +443,7 @@ function renderPresetVueGlobalLibraryGroup(h, vueDraggableNext, group) {
                         'fa-solid',
                         'fa-chevron-down',
                     ],
-                    title: group.collapsed ? t`展开分组` : t`收起分组`,
+                    title: group.collapsed ? t`Expand group` : t`Collapse group`,
                 }),
                 h('span', { class: 'bai-bai-preset-group-title-content' }, [
                     h('span', { class: 'fa-solid fa-folder bai-bai-preset-global-library-group-icon' }),
@@ -455,7 +455,7 @@ function renderPresetVueGlobalLibraryGroup(h, vueDraggableNext, group) {
                 renderPresetVuePromptActionButton(h, {
                     action: 'global-library-group-rename',
                     icon: 'fa-pencil',
-                    text: t`重命名分组`,
+                    text: t`Rename group`,
                     onClick: event => {
                         event.stopPropagation();
                         handlePresetPromptActionButtonClick(event);
@@ -464,7 +464,7 @@ function renderPresetVueGlobalLibraryGroup(h, vueDraggableNext, group) {
                 renderPresetVuePromptActionButton(h, {
                     action: 'global-library-group-delete',
                     icon: 'fa-trash',
-                    text: t`删除分组`,
+                    text: t`Delete group`,
                     caution: true,
                     onClick: event => {
                         event.stopPropagation();
@@ -486,7 +486,7 @@ function renderPresetVueGlobalLibraryGroup(h, vueDraggableNext, group) {
 
 function renderPresetVuePromptGlobalLibraryRow(h, item) {
     const prefix = promptManager?.configuration?.prefix ?? '';
-    const name = item.name || t`未命名条目`;
+    const name = item.name || t`Unnamed entry`;
     const selecting = Boolean(item.selecting);
     const selected = Boolean(item.selected);
     const leadingCell = selecting
@@ -499,12 +499,12 @@ function renderPresetVuePromptGlobalLibraryRow(h, item) {
                 selected ? 'fa-square-check' : 'fa-square',
             ],
             'data-preset-prompt-action': 'global-library-select-item',
-            title: selected ? t`取消选择` : t`选择`,
+            title: selected ? t`Deselect` : t`Select`,
             onClick: event => handlePresetPromptActionButtonClick(event),
         })
         : h('span', {
             class: 'drag-handle ui-sortable-handle bai-bai-preset-global-library-row-marker',
-            title: t`拖动以移动到分组`,
+            title: t`Drag to move to a group`,
         }, '\u2630');
 
     return h('li', {
@@ -530,20 +530,20 @@ function renderPresetVuePromptGlobalLibraryRow(h, item) {
                 renderPresetVuePromptActionButton(h, {
                     action: 'global-library-delete',
                     icon: 'fa-trash',
-                    text: t`删除全局库条目`,
+                    text: t`Delete global library entry`,
                     caution: true,
                     onClick: event => handlePresetPromptActionButtonClick(event),
                 }),
                 renderPresetVuePromptActionButton(h, {
                     action: 'global-library-edit',
                     icon: 'fa-pencil',
-                    text: t`编辑全局库条目`,
+                    text: t`Edit global library entry`,
                     onClick: event => handlePresetPromptActionButtonClick(event),
                 }),
                 renderPresetVuePromptActionButton(h, {
                     action: 'global-library-insert',
                     icon: 'fa-plus',
-                    text: t`添加到当前预设`,
+                    text: t`Add to current preset`,
                     onClick: event => handlePresetPromptActionButtonClick(event),
                 }),
             ]),
@@ -645,7 +645,7 @@ function normalizePresetGlobalPromptLibraryItems(items, validGroupIds = null) {
 }
 
 function normalizePresetGlobalPromptLibraryName(name) {
-    return String(name || '').trim() || t`未命名条目`;
+    return String(name || '').trim() || t`Unnamed entry`;
 }
 
 async function ensureBaiBaoKuBridge() {
@@ -944,8 +944,8 @@ function showPresetGlobalLibraryDialog({
     title,
     message = '',
     fields = [],
-    confirmText = t`确定`,
-    cancelText = t`取消`,
+    confirmText = t`OK`,
+    cancelText = t`Cancel`,
     danger = false,
 } = {}) {
     const host = getPresetGlobalLibraryDialogHost();
@@ -1021,7 +1021,7 @@ function showPresetGlobalLibraryDialog({
         actions.className = 'bai-bai-preset-global-library-dialog-actions';
         titleElement.textContent = title || '';
         closeButton.className = 'menu_button fa-solid fa-xmark bai-bai-preset-global-library-dialog-button';
-        closeButton.title = t`取消`;
+        closeButton.title = t`Cancel`;
         cancelButton.className = 'menu_button bai-bai-preset-global-library-dialog-button';
         cancelButton.textContent = cancelText;
         confirmButton.className = [
@@ -1183,7 +1183,7 @@ async function insertSelectedPresetGlobalLibraryItemsToCurrentPreset() {
     const ids = getPresetGlobalLibrarySelectedItemIds();
 
     if (ids.length === 0) {
-        toastr.warning(t`请先选择要添加的条目。`);
+        toastr.warning(t`Select the entries to add first.`);
         return;
     }
 
@@ -1198,25 +1198,25 @@ async function moveSelectedPresetGlobalLibraryItemsToGroup() {
     const ids = getPresetGlobalLibrarySelectedItemIds();
 
     if (ids.length === 0) {
-        toastr.warning(t`请先选择要移动的条目。`);
+        toastr.warning(t`Select the entries to move first.`);
         return;
     }
 
     const library = await loadPresetGlobalPromptLibrary();
     const result = await showPresetGlobalLibraryDialog({
-        title: t`移动选中到分组`,
+        title: t`Move selected to group`,
         fields: [{
             id: 'target',
             type: 'select',
-            label: t`目标分组`,
+            label: t`Target group`,
             value: '',
             options: [
-                { value: '', label: t`未分组` },
+                { value: '', label: t`Ungrouped` },
                 ...library.groups.map(group => ({ value: group.id, label: group.name })),
             ],
         }],
-        confirmText: t`移动`,
-        cancelText: t`取消`,
+        confirmText: t`Move`,
+        cancelText: t`Cancel`,
     });
 
     if (!result) {
@@ -1235,11 +1235,11 @@ async function moveSelectedPresetGlobalLibraryItemsToGroup() {
                 : item);
             return currentLibrary;
         });
-        toastr.success(t`已移动 ${ids.length} 条。`);
+        toastr.success(t`Moved ${ids.length} entries.`);
         togglePresetGlobalLibrarySelecting();
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to move selected global library items`, error);
-        toastr.error(t`移动条目失败。`);
+        toastr.error(t`Failed to move entries.`);
     }
 }
 
@@ -1247,15 +1247,15 @@ async function deleteSelectedPresetGlobalLibraryItems() {
     const ids = getPresetGlobalLibrarySelectedItemIds();
 
     if (ids.length === 0) {
-        toastr.warning(t`请先选择要删除的条目。`);
+        toastr.warning(t`Select the entries to delete first.`);
         return;
     }
 
     const confirmed = await showPresetGlobalLibraryDialog({
-        title: t`删除选中`,
-        message: t`要删除选中的 ${ids.length} 条全局库条目吗？`,
-        confirmText: t`删除`,
-        cancelText: t`取消`,
+        title: t`Delete selected`,
+        message: t`Delete the ${ids.length} selected global library entries?`,
+        confirmText: t`Delete`,
+        cancelText: t`Cancel`,
         danger: true,
     });
 
@@ -1270,24 +1270,24 @@ async function deleteSelectedPresetGlobalLibraryItems() {
             currentLibrary.items = currentLibrary.items.filter(item => !idSet.has(item.id));
             return currentLibrary;
         });
-        toastr.success(t`已删除 ${ids.length} 条。`);
+        toastr.success(t`Deleted ${ids.length} entries.`);
         togglePresetGlobalLibrarySelecting();
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to delete selected global library items`, error);
-        toastr.error(t`删除条目失败。`);
+        toastr.error(t`Failed to delete entries.`);
     }
 }
 
 async function addPresetPromptToGlobalLibrary(promptId) {
     if (!promptId) {
-        toastr.warning(t`没有找到要添加到全局库的条目。`);
+        toastr.warning(t`No entries found to add to the global library.`);
         return false;
     }
 
     const sourcePrompt = promptManager?.getPromptById?.(promptId);
 
     if (!sourcePrompt) {
-        toastr.warning(t`没有找到要添加到全局库的条目。`);
+        toastr.warning(t`No entries found to add to the global library.`);
         return false;
     }
 
@@ -1302,11 +1302,11 @@ async function addPresetPromptToGlobalLibrary(promptId) {
             library.items.push(item);
             return library;
         });
-        toastr.success(t`已添加到全局库。`);
+        toastr.success(t`Added to the global library.`);
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to add preset prompt to global library`, error);
-        toastr.error(t`添加到全局库失败。`);
+        toastr.error(t`Failed to add to the global library.`);
         return false;
     }
 }
@@ -1319,7 +1319,7 @@ async function insertPresetGlobalLibraryItemsToCurrentPreset(itemIds) {
     const ids = Array.isArray(itemIds) ? itemIds.filter(Boolean) : [];
 
     if (ids.length === 0) {
-        toastr.warning(t`没有要添加的全局库条目。`);
+        toastr.warning(t`No global library entries to add.`);
         return false;
     }
 
@@ -1328,14 +1328,14 @@ async function insertPresetGlobalLibraryItemsToCurrentPreset(itemIds) {
         || !Array.isArray(promptManager.serviceSettings?.prompts)
         || typeof promptManager.addPrompt !== 'function'
     ) {
-        toastr.warning(t`当前无法添加全局库条目。`);
+        toastr.warning(t`Cannot add global library entries right now.`);
         return false;
     }
 
     const promptOrder = promptManager.getPromptOrderForCharacter?.(promptManager.activeCharacter);
 
     if (!Array.isArray(promptOrder)) {
-        toastr.warning(t`当前预设列表不可用。`);
+        toastr.warning(t`The current preset list is unavailable.`);
         return false;
     }
 
@@ -1344,7 +1344,7 @@ async function insertPresetGlobalLibraryItemsToCurrentPreset(itemIds) {
     const items = ids.map(id => itemsById.get(id)).filter(Boolean);
 
     if (items.length === 0) {
-        toastr.warning(t`没有找到要添加的全局库条目。`);
+        toastr.warning(t`Global library entry to add not found.`);
         return false;
     }
 
@@ -1383,12 +1383,12 @@ async function insertPresetGlobalLibraryItemsToCurrentPreset(itemIds) {
     try {
         markPresetPromptServiceSettingsSavePending();
         await flushPendingPresetPromptChanges({ includeOpenAiPresetSaves: false });
-        toastr.success(items.length > 1 ? t`已添加 ${items.length} 条到当前预设。` : t`已添加到当前预设。`);
+        toastr.success(items.length > 1 ? t`Added ${items.length} entries to the current preset.` : t`Added to the current preset.`);
         refreshPromptManagerTokensDebounced();
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to save global library prompt insert`, error);
-        toastr.error(t`添加到当前预设后保存失败。`);
+        toastr.error(t`Added to the current preset, but saving failed.`);
         return false;
     }
 }
@@ -1404,22 +1404,22 @@ async function choosePresetGlobalPromptInsertTarget() {
     }
 
     const result = await showPresetGlobalLibraryDialog({
-        title: t`添加到当前预设`,
+        title: t`Add to current preset`,
         fields: [{
             id: 'target',
             type: 'select',
-            label: t`添加位置`,
+            label: t`Insert position`,
             value: 'top',
             options: [
-                { value: 'top', label: t`独立在预设最上方` },
+                { value: 'top', label: t`Standalone at the top of the preset` },
                 ...groups.map(group => ({
                     value: group.id,
                     label: group.name,
                 })),
             ],
         }],
-        confirmText: t`添加`,
-        cancelText: t`取消`,
+        confirmText: t`Add`,
+        cancelText: t`Cancel`,
     });
 
     if (!result) {
@@ -1499,29 +1499,29 @@ async function editPresetGlobalPromptLibraryItem(itemId) {
     const item = await getPresetGlobalPromptLibraryItem(itemId);
 
     if (!item) {
-        toastr.warning(t`没有找到这个全局库条目。`);
+        toastr.warning(t`This global library entry was not found.`);
         return false;
     }
 
     const result = await showPresetGlobalLibraryDialog({
-        title: t`编辑全局库条目`,
+        title: t`Edit global library entry`,
         fields: [
             {
                 id: 'name',
                 type: 'text',
-                label: t`名称`,
+                label: t`Name`,
                 value: item.name,
             },
             {
                 id: 'content',
                 type: 'textarea',
-                label: t`内容`,
+                label: t`Content`,
                 value: item.content,
                 rows: 16,
             },
         ],
-        confirmText: t`保存`,
-        cancelText: t`取消`,
+        confirmText: t`Save`,
+        cancelText: t`Cancel`,
     });
 
     if (!result) {
@@ -1542,11 +1542,11 @@ async function editPresetGlobalPromptLibraryItem(itemId) {
                 : entry);
             return library;
         });
-        toastr.success(t`已更新全局库条目。`);
+        toastr.success(t`Global library entry updated.`);
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to edit preset global library item`, error);
-        toastr.error(t`更新全局库条目失败。`);
+        toastr.error(t`Failed to update global library entry.`);
         return false;
     }
 }
@@ -1555,15 +1555,15 @@ async function deletePresetGlobalPromptLibraryItem(itemId) {
     const item = await getPresetGlobalPromptLibraryItem(itemId);
 
     if (!item) {
-        toastr.warning(t`没有找到这个全局库条目。`);
+        toastr.warning(t`This global library entry was not found.`);
         return false;
     }
 
     const confirmed = await showPresetGlobalLibraryDialog({
-        title: t`删除全局库条目`,
-        message: t`要删除这个全局库条目吗？`,
-        confirmText: t`删除`,
-        cancelText: t`取消`,
+        title: t`Delete global library entry`,
+        message: t`Delete this global library entry?`,
+        confirmText: t`Delete`,
+        cancelText: t`Cancel`,
         danger: true,
     });
 
@@ -1576,11 +1576,11 @@ async function deletePresetGlobalPromptLibraryItem(itemId) {
             library.items = library.items.filter(entry => entry.id !== itemId);
             return library;
         });
-        toastr.success(t`已删除全局库条目。`);
+        toastr.success(t`Global library entry deleted.`);
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to delete preset global library item`, error);
-        toastr.error(t`删除全局库条目失败。`);
+        toastr.error(t`Failed to delete global library entry.`);
         return false;
     }
 }
@@ -1648,22 +1648,22 @@ async function handlePresetGlobalLibraryDrop() {
         });
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to persist global library drag`, error);
-        toastr.error(t`移动全局库条目失败。`);
+        toastr.error(t`Failed to move global library entry.`);
         void loadPresetGlobalPromptLibrary({ force: true, showLoading: false });
     }
 }
 
 async function createPresetGlobalLibraryGroup() {
     const result = await showPresetGlobalLibraryDialog({
-        title: t`新建分组`,
+        title: t`New group`,
         fields: [{
             id: 'name',
             type: 'text',
-            label: t`分组名称`,
+            label: t`Group name`,
             value: '',
         }],
-        confirmText: t`创建`,
-        cancelText: t`取消`,
+        confirmText: t`Create`,
+        cancelText: t`Cancel`,
     });
 
     if (!result) {
@@ -1677,11 +1677,11 @@ async function createPresetGlobalLibraryGroup() {
             library.groups.push({ id: uuidv4(), name, collapsed: false });
             return library;
         });
-        toastr.success(t`已新建分组。`);
+        toastr.success(t`Group created.`);
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to create global library group`, error);
-        toastr.error(t`新建分组失败。`);
+        toastr.error(t`Failed to create group.`);
         return false;
     }
 }
@@ -1695,20 +1695,20 @@ async function renamePresetGlobalLibraryGroup(groupId) {
     const group = library.groups.find(entry => entry.id === groupId);
 
     if (!group) {
-        toastr.warning(t`没有找到这个分组。`);
+        toastr.warning(t`This group was not found.`);
         return false;
     }
 
     const result = await showPresetGlobalLibraryDialog({
-        title: t`重命名分组`,
+        title: t`Rename group`,
         fields: [{
             id: 'name',
             type: 'text',
-            label: t`分组名称`,
+            label: t`Group name`,
             value: group.name,
         }],
-        confirmText: t`保存`,
-        cancelText: t`取消`,
+        confirmText: t`Save`,
+        cancelText: t`Cancel`,
     });
 
     if (!result) {
@@ -1724,11 +1724,11 @@ async function renamePresetGlobalLibraryGroup(groupId) {
                 : entry);
             return currentLibrary;
         });
-        toastr.success(t`已重命名分组。`);
+        toastr.success(t`Group renamed.`);
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to rename global library group`, error);
-        toastr.error(t`重命名分组失败。`);
+        toastr.error(t`Failed to rename group.`);
         return false;
     }
 }
@@ -1742,15 +1742,15 @@ async function deletePresetGlobalLibraryGroup(groupId) {
     const group = library.groups.find(entry => entry.id === groupId);
 
     if (!group) {
-        toastr.warning(t`没有找到这个分组。`);
+        toastr.warning(t`This group was not found.`);
         return false;
     }
 
     const confirmed = await showPresetGlobalLibraryDialog({
-        title: t`删除分组`,
-        message: t`删除分组后,组内条目会移到未分组,条目本身不会被删除。确定删除吗？`,
-        confirmText: t`删除`,
-        cancelText: t`取消`,
+        title: t`Delete group`,
+        message: t`Deleting the group moves its entries to Ungrouped; the entries themselves are not deleted. Delete?`,
+        confirmText: t`Delete`,
+        cancelText: t`Cancel`,
         danger: true,
     });
 
@@ -1766,11 +1766,11 @@ async function deletePresetGlobalLibraryGroup(groupId) {
                 : item);
             return currentLibrary;
         });
-        toastr.success(t`已删除分组。`);
+        toastr.success(t`Group deleted.`);
         return true;
     } catch (error) {
         console.debug(`${LOG_PREFIX} Failed to delete global library group`, error);
-        toastr.error(t`删除分组失败。`);
+        toastr.error(t`Failed to delete group.`);
         return false;
     }
 }

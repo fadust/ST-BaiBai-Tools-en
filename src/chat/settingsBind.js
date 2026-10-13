@@ -145,9 +145,9 @@ function applyChatOptimizationCompatibilityIndicators(container) {
         markSettingCompatibility(
             container,
             '#bai_bai_toolkit_welcome_recent_chat_direct_open_enabled',
-            '（兼容模式）',
+            ' (compatibility mode)',
             false,
-            '当前酒馆版本未导出 createOrEditCharacter，已使用兼容模式。',
+            'This SillyTavern version does not export createOrEditCharacter; using compatibility mode.',
         );
     }
 
@@ -155,9 +155,9 @@ function applyChatOptimizationCompatibilityIndicators(container) {
         markSettingCompatibility(
             container,
             '#bai_bai_toolkit_chat_delete_edit_flow_optimization_enabled',
-            '（当前酒馆版本过低，请更新）',
+            ' (SillyTavern version too old, please update)',
             true,
-            '当前酒馆版本未导出 messageEdit，请更新酒馆后使用。',
+            'This SillyTavern version does not export messageEdit; update SillyTavern to use this.',
         );
     }
 }

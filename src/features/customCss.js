@@ -1145,7 +1145,7 @@ function createCustomCssCodeMirrorView(state, source, wrapper, modules) {
             autocapitalize: 'off',
             autocorrect: 'off',
             spellcheck: 'false',
-            'aria-label': '自定义 CSS',
+            'aria-label': 'Custom CSS',
         }));
     }
 

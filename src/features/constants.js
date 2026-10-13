@@ -2,7 +2,7 @@ import { event_types } from '@sillytavern/script';
 
 const CURRENT_VERSION = __BBT_VERSION__;
 
-const LOG_PREFIX = '[柏宝箱]';
+const LOG_PREFIX = '[BaiBai Tools]';
 const SETTINGS_KEY = 'baiBaiToolkit';
 const EXTENSION_KEY = '__baiBaiToolkitExtensionInstalled';
 const FAST_SETTINGS_BOOTSTRAP_FETCH_KEY = '__baiBaiToolkitFastSettingsBootstrapFetchPatched';

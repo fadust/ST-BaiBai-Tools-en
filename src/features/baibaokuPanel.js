@@ -41,8 +41,8 @@ function applyBaibaokuPanelLocalState(container) {
     const presetAutoBackupToggle = container.find('#bai_bai_toolkit_preset_auto_backup_enabled');
 
     const bridgeLabel = bridge?.installed
-        ? `已注入${bridge.version ? ` v${bridge.version}` : ''}`
-        : '未注入';
+        ? `Injected${bridge.version ? ` v${bridge.version}` : ''}`
+        : 'Not injected';
     updateBaibaokuStatusText(bridgeStatus, bridgeLabel, Boolean(bridge?.installed));
 
     container.find('#bai_bai_toolkit_baibaoku_settings_acceleration_enabled')
@@ -82,16 +82,16 @@ function applyCachedBaibaokuPanelStatus(container, cache) {
     const driver = status?.driver;
 
     if (status) {
-        updateBaibaokuStatusText(serverStatus, `已连接${status?.version ? ` v${status.version}` : ''}`, true);
+        updateBaibaokuStatusText(serverStatus, `Connected${status?.version ? ` v${status.version}` : ''}`, true);
         updateBaibaokuStatusText(driverStatus, driver?.available
-            ? `可用${driver.package ? ` (${driver.package})` : ''}`
-            : '不可用', Boolean(driver?.available));
+            ? `Available${driver.package ? ` (${driver.package})` : ''}`
+            : 'Unavailable', Boolean(driver?.available));
         return true;
     }
 
     if (cache.offline) {
-        updateBaibaokuStatusText(serverStatus, '未安装', false);
-        updateBaibaokuStatusText(driverStatus, '未知', false);
+        updateBaibaokuStatusText(serverStatus, 'Not installed', false);
+        updateBaibaokuStatusText(driverStatus, 'Unknown', false);
         return true;
     }
 
@@ -115,7 +115,7 @@ function applyPresetAutoBackupToggleAvailability(container, status) {
         .css('opacity', supported ? '' : '0.55')
         .attr('title', supported
             ? label.data('presetAutoBackupDefaultTitle')
-            : `\u9884\u8bbe\u81ea\u52a8\u5907\u4efd\u9700\u8981\u67cf\u5b9d\u5e93 v${BAIBAOKU_PRESET_AUTO_BACKUP_MIN_VERSION} \u6216\u66f4\u9ad8\u7248\u672c`);
+            : `Preset auto-backup needs BaiBaoKu v${BAIBAOKU_PRESET_AUTO_BACKUP_MIN_VERSION} or later`);
 }
 
 function isBaibaokuVersionAtLeast(version, minimumVersion) {
@@ -159,8 +159,8 @@ async function refreshBaibaokuPanelStatus(container, { force = false } = {}) {
     const bridge = getBaibaokuEarlyBridge();
 
     updateBaibaokuStatusText(bridgeStatus, bridge?.installed
-        ? `已注入${bridge.version ? ` v${bridge.version}` : ''}`
-        : '未注入', Boolean(bridge?.installed));
+        ? `Injected${bridge.version ? ` v${bridge.version}` : ''}`
+        : 'Not injected', Boolean(bridge?.installed));
 
     const bridgeEnabled = typeof bridge?.isSettingsAccelerationEnabled === 'function'
         ? bridge.isSettingsAccelerationEnabled()
@@ -219,8 +219,8 @@ async function refreshBaibaokuPanelStatus(container, { force = false } = {}) {
         chatKeyboardScanReductionToggle.prop('checked', bridgeChatKeyboardScanReductionEnabled);
     }
 
-    updateBaibaokuStatusText(serverStatus, '检测中', null);
-    updateBaibaokuStatusText(driverStatus, '检测中', null);
+    updateBaibaokuStatusText(serverStatus, 'Checking', null);
+    updateBaibaokuStatusText(driverStatus, 'Checking', null);
 
     try {
         const status = await fetchBaibaokuStatus();
@@ -233,10 +233,10 @@ async function refreshBaibaokuPanelStatus(container, { force = false } = {}) {
             updatedAt: Date.now(),
         };
         refreshed = true;
-        updateBaibaokuStatusText(serverStatus, `已连接${status?.version ? ` v${status.version}` : ''}`, true);
+        updateBaibaokuStatusText(serverStatus, `Connected${status?.version ? ` v${status.version}` : ''}`, true);
         updateBaibaokuStatusText(driverStatus, driver?.available
-            ? `可用${driver.package ? ` (${driver.package})` : ''}`
-            : '不可用', Boolean(driver?.available));
+            ? `Available${driver.package ? ` (${driver.package})` : ''}`
+            : 'Unavailable', Boolean(driver?.available));
         applyPresetAutoBackupToggleAvailability(container, status);
         void maybeShowBaibaokuBackendUpdatePrompt(status);
 
@@ -316,8 +316,8 @@ async function refreshBaibaokuPanelStatus(container, { force = false } = {}) {
         }
     } catch {
         markSaveGenerateBackendAvailable(globalThis[SAVE_GENERATE_FETCH_KEY], false);
-        updateBaibaokuStatusText(serverStatus, '未安装', false);
-        updateBaibaokuStatusText(driverStatus, '未知', false);
+        updateBaibaokuStatusText(serverStatus, 'Not installed', false);
+        updateBaibaokuStatusText(driverStatus, 'Unknown', false);
         applyPresetAutoBackupToggleAvailability(container, null);
     }
     if (!refreshed) {
@@ -367,11 +367,11 @@ async function maybeShowBaibaokuBackendUpdatePrompt(status) {
     extensionState.baibaokuBackendUpdatePromptShown = promptKey;
     extensionState.baibaokuBackendUpdatePromptPromise = callGenericPopup(`
         <div class="bai_bai_toolkit_baibaoku_update_prompt">
-            <h3>柏宝库需要更新！</h3>
-            <p>当前版本存在部分BUG，请重启酒馆让柏宝库自动更新到最新版本，注意不是刷新网页，是重启酒馆后台</p>
+            <h3>BaiBaoKu needs an update!</h3>
+            <p>This version has some bugs. Restart SillyTavern so BaiBaoKu updates itself to the latest version. Note: restart the SillyTavern server, not just reload the page.</p>
         </div>
     `, POPUP_TYPE.TEXT, '', {
-        okButton: '知道了',
+        okButton: 'Got it',
     }).catch(error => {
         console.debug(`${LOG_PREFIX} Failed to show BaiBaoKu backend update prompt`, error);
     }).finally(() => {
@@ -382,8 +382,8 @@ async function maybeShowBaibaokuBackendUpdatePrompt(status) {
 }
 
 function showBaibaokuInstallHelpPrompt() {
-    callGenericPopup('请看帖子标注内容', POPUP_TYPE.TEXT, '', {
-        okButton: '知道了',
+    callGenericPopup('See the notes in the post', POPUP_TYPE.TEXT, '', {
+        okButton: 'Got it',
     }).catch(error => {
         console.debug(`${LOG_PREFIX} Failed to show BaiBaoKu install help prompt`, error);
     });

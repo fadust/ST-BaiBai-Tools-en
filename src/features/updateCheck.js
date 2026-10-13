@@ -40,7 +40,7 @@ async function runSilentExtensionUpdate() {
     try {
         const localVersion = CURRENT_VERSION;
 
-        const remoteManifestUrl = `https://raw.githubusercontent.com/baibai-git/SillyTavern-Mobile-Resize-Guard/main/manifest.json?t=${Date.now()}`;
+        const remoteManifestUrl = `https://raw.githubusercontent.com/fadust/ST-BaiBai-Tools-en/main/manifest.json?t=${Date.now()}`;
         const remoteManifestResponse = await fetch(remoteManifestUrl, { cache: 'no-store' });
         if (!remoteManifestResponse.ok) {
             throw new Error(`Failed to fetch remote manifest: ${remoteManifestResponse.statusText}`);
@@ -160,7 +160,7 @@ async function runExtensionUpdatePrompt(updateButton) {
         return true;
     } catch (error) {
         console.error(`${LOG_PREFIX} Update failed:`, error);
-        toastr.error(`更新失败: ${error.message}`);
+        toastr.error(`Update failed: ${error.message}`);
         return false;
     } finally {
         if (shouldResetButton) {
@@ -172,14 +172,14 @@ async function runExtensionUpdatePrompt(updateButton) {
 async function confirmExtensionUpdate() {
     const content = `
         <div class="bai_bai_toolkit_update_prompt">
-            <h3>柏宝箱发现新版本</h3>
-            <p>检测到插件有可用更新。要现在更新吗？</p>
-            <p>更新完成后，SillyTavern 会自动刷新页面。</p>
+            <h3>BaiBai Tools: new version found</h3>
+            <p>An extension update is available. Update now?</p>
+            <p>SillyTavern reloads the page automatically after the update.</p>
         </div>
     `;
     const result = await callGenericPopup(content, POPUP_TYPE.CONFIRM, '', {
-        okButton: '更新',
-        cancelButton: '取消',
+        okButton: 'Update',
+        cancelButton: 'Cancel',
     });
 
     return result === POPUP_RESULT.AFFIRMATIVE;
@@ -202,7 +202,7 @@ function setUpdateButtonLoading(button) {
     }
 
     button.addClass('disabled');
-    button.find('span').text('更新中...');
+    button.find('span').text('Updating...');
     button.find('i').removeClass('fa-download').addClass('fa-spinner fa-spin');
 }
 
@@ -212,7 +212,7 @@ function resetUpdateButton(button) {
     }
 
     button.removeClass('disabled');
-    button.find('span').text('更新');
+    button.find('span').text('Update');
     button.find('i').removeClass('fa-spinner fa-spin').addClass('fa-download');
 }
 
@@ -237,7 +237,7 @@ async function initializeUpdateUI(container) {
     const badge = container.find('.bai_bai_toolkit_update_badge');
 
     versionSpan.text(CURRENT_VERSION);
-    updateStatus.text('检查更新中...');
+    updateStatus.text('Checking for updates...');
 
     if (extensionState.silentUpdateResult) {
         showUpdateState(extensionState.silentUpdateResult);
@@ -249,7 +249,7 @@ async function initializeUpdateUI(container) {
         try {
             showUpdateState(await checkForSilentExtensionUpdate());
         } catch (e) {
-            updateStatus.text('检查更新出错');
+            updateStatus.text('Update check failed');
         }
     }
 
@@ -269,7 +269,7 @@ async function initializeUpdateUI(container) {
     function showUpdateError() {
         updateButton.hide();
         badge.hide();
-        updateStatus.text('检查更新出错');
+        updateStatus.text('Update check failed');
     }
 
     function showUpdateAvailable() {
@@ -281,7 +281,7 @@ async function initializeUpdateUI(container) {
     function showNoUpdateAvailable() {
         updateButton.hide();
         badge.hide();
-        updateStatus.text('已是最新版本');
+        updateStatus.text('Already up to date');
         setTimeout(() => updateStatus.text(''), 3000);
     }
 

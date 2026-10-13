@@ -447,7 +447,7 @@ function createDescriptionCodeMirrorView(state, source, wrapper, modules) {
             autocapitalize: 'off',
             autocorrect: 'off',
             spellcheck: 'false',
-            'aria-label': source.getAttribute('aria-label') || '角色描述',
+            'aria-label': source.getAttribute('aria-label') || 'Character description',
         }));
     }
 

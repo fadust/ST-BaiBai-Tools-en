@@ -109,13 +109,13 @@ async function deleteRegexVueGroup(scriptType, groupId) {
         return;
     }
 
-    const result = await callGenericPopup('要删除这个正则分组吗？\n\n选择“否”会把组内正则移动到默认组。\n选择“是”会连同组内正则一起删除。', POPUP_TYPE.CONFIRM, '', {
-        okButton: '是',
-        cancelButton: '取消',
+    const result = await callGenericPopup('Delete this regex group?\n\nChoose "No" to move its regexes to the default group.\nChoose "Yes" to delete the regexes in it too.', POPUP_TYPE.CONFIRM, '', {
+        okButton: 'Yes',
+        cancelButton: 'Cancel',
         defaultResult: POPUP_RESULT.NEGATIVE,
         customButtons: [
             {
-                text: '否',
+                text: 'No',
                 result: POPUP_RESULT.CUSTOM1,
             },
         ],
@@ -581,7 +581,7 @@ async function promptBulkMoveRegexVueSelectedScriptsToGroup(scriptType) {
     }
 
     const template = $('<div class="bai-bai-regex-move-group-popup"></div>');
-    const label = $('<label class="bai-bai-regex-move-group-label"></label>').text(t`目标分组`);
+    const label = $('<label class="bai-bai-regex-move-group-label"></label>').text(t`Target group`);
     const select = $('<select class="text_pole bai-bai-regex-move-group-select"></select>');
 
     for (const target of targets) {
@@ -592,13 +592,13 @@ async function promptBulkMoveRegexVueSelectedScriptsToGroup(scriptType) {
     }
 
     template.append(
-        $('<div class="bai-bai-regex-move-group-count"></div>').text(t`已选正则：${selectedScripts.length}`),
+        $('<div class="bai-bai-regex-move-group-count"></div>').text(t`Selected regexes: ${selectedScripts.length}`),
         label.append(select),
     );
 
     const confirmed = await callGenericPopup(template, POPUP_TYPE.CONFIRM, '', {
-        okButton: t`移动`,
-        cancelButton: t`取消`,
+        okButton: t`Move`,
+        cancelButton: t`Cancel`,
     });
 
     if (!confirmed) {

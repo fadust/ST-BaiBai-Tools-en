@@ -67,7 +67,7 @@ function getRegexPresetGroupScopeKey(apiId, presetName) {
 }
 
 function getRegexDefaultUngroupedGroupName() {
-    return t`默认分组`;
+    return t`Default group`;
 }
 
 function getRegexUngroupedGroupDisplayName(name) {

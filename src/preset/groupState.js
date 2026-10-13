@@ -92,7 +92,7 @@ function normalizePresetPromptGroupState(groupState, validPromptIds = null) {
         .filter(group => group && typeof group === 'object' && group.id)
         .map((group, index) => ({
             id: String(group.id),
-            name: String(group.name || t`未命名分组`),
+            name: String(group.name || t`Unnamed group`),
             order: Number.isFinite(Number(group.order)) ? Number(group.order) : index,
             collapsed: Boolean(group.collapsed),
             enabled: group.enabled !== false,
@@ -155,11 +155,11 @@ function getCompatPresetPromptGroupStateCandidates(validPromptIds = getCurrentPr
 
     return [
         {
-            formatName: t`起止范围格式`,
+            formatName: t`Start/end range format`,
             state: convertCompatEntryGroupingRangeToPresetPromptGroupState(entryGrouping, validPromptIds),
         },
         {
-            formatName: t`成员列表格式`,
+            formatName: t`Member list format`,
             state: convertCompatEntryGroupingMembersToPresetPromptGroupState(entryGrouping, validPromptIds),
         },
     ].filter(candidate => hasPresetPromptGroupStateData(candidate.state));
@@ -220,7 +220,7 @@ function convertCompatEntryGroupingRangeToPresetPromptGroupState(entryGrouping, 
         const groupId = String(entry.id || uuidv4());
         groupState.groups.push({
             id: groupId,
-            name: String(entry.name || t`未命名分组`),
+            name: String(entry.name || t`Unnamed group`),
             order: index,
             collapsed: true,
             enabled: true,
@@ -271,7 +271,7 @@ function convertCompatEntryGroupingMembersToPresetPromptGroupState(entryGrouping
         const groupId = String(entry.id || uuidv4());
         groupState.groups.push({
             id: groupId,
-            name: String(entry.name || t`未命名分组`),
+            name: String(entry.name || t`Unnamed group`),
             order: index,
             collapsed: true,
             enabled: true,
@@ -326,11 +326,11 @@ async function choosePresetPromptGroupCompatCandidate(candidates, validPromptIds
             '',
             {
                 okButton: false,
-                cancelButton: t`取消`,
+                cancelButton: t`Cancel`,
                 allowVerticalScrolling: true,
                 wider: true,
                 customButtons: candidates.map((candidate, index) => ({
-                    text: t`使用分组${getPresetPromptGroupCompatChoiceLetter(index)}`,
+                    text: t`Use group ${getPresetPromptGroupCompatChoiceLetter(index)}`,
                     result: PRESET_GROUP_COMPAT_CHOICE_RESULT_BASE + index,
                     tooltip: candidate.formatName,
                 })),
@@ -368,15 +368,15 @@ function renderPresetPromptGroupCompatChoicePopup(candidates) {
             const groupNames = groups.map(group => group.name).filter(Boolean);
             const previewNames = groupNames.slice(0, 6).map(name => escapeHtml(name));
             const suffix = groupNames.length > previewNames.length ? '...' : '';
-            const preview = [...previewNames, suffix].filter(Boolean).join('、') || t`无`;
+            const preview = [...previewNames, suffix].filter(Boolean).join(', ') || t`none`;
 
-            return `<p><strong>${t`分组`}${letter}</strong>${t`有${groups.length}个分组`}：${preview}</p>`;
+            return `<p><strong>${t`Group `}${letter}</strong>${t`has ${groups.length} groups`}: ${preview}</p>`;
         })
         .join('');
 
     return `
         <div class="bai-bai-preset-group-import-choice">
-            <p>${t`检测到当前预设同时包含两种可兼容的分组格式，请选择要导入的分组。`}</p>
+            <p>${t`The current preset contains both compatible group formats. Choose which groups to import.`}</p>
             ${lines}
         </div>
     `;

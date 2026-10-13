@@ -198,8 +198,8 @@ const PRESET_CONTEXT_INJECTION_PROMPT_IDS = new Set([
     'dialogueExamples',
 ]);
 const PRESET_EFFECTIVE_TOKEN_HEADER_CLASS = 'bai-bai-preset-effective-token-header';
-const PRESET_EFFECTIVE_TOKEN_HEADER_PENDING_TEXT = '预设总Token: 计算中';
-const PRESET_EFFECTIVE_TOKEN_HEADER_TITLE = '已启用预设条目 Token 总数（不含聊天记录、世界书、角色信息等上下文注入）';
+const PRESET_EFFECTIVE_TOKEN_HEADER_PENDING_TEXT = 'Preset total tokens: calculating';
+const PRESET_EFFECTIVE_TOKEN_HEADER_TITLE = 'Total tokens of enabled preset entries (excludes chat history, World Info, character info and other injected context)';
 
 const PRESET_BACKUP_PREVIEW_PAGE_SIZE = 5;
 const PRESET_BACKUP_PREVIEW_NOTE_MAX_LENGTH = 500;

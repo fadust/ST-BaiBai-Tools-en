@@ -193,8 +193,8 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 const lastVisible = visibleCount > 0 ? Math.min(this.safePage * PRESET_BACKUP_PREVIEW_PAGE_SIZE, visibleCount) : 0;
 
                 return this.normalizedQuery
-                    ? `\u663e\u793a ${firstVisible}-${lastVisible} / ${visibleCount} \u4e2a\u5339\u914d\u5907\u4efd\uff0c\u5171 ${total} \u4e2a\u5907\u4efd`
-                    : `\u663e\u793a ${firstVisible}-${lastVisible} / ${total} \u4e2a\u5907\u4efd`;
+                    ? `Showing ${firstVisible}-${lastVisible} of ${visibleCount} matching backups, ${total} backups total`
+                    : `Showing ${firstVisible}-${lastVisible} of ${total} backups`;
             },
         },
         watch: {
@@ -244,7 +244,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 }
 
                 this.loading = true;
-                this.status = '\u6b63\u5728\u5237\u65b0\u5907\u4efd\u5217\u8868...';
+                this.status = 'Refreshing backup list...';
 
                 try {
                     this.items = await fetchPresetBackupPreviewItems();
@@ -253,7 +253,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                     this.status = '';
                 } catch (error) {
                     console.warn(`${LOG_PREFIX} Failed to refresh preset backups`, error);
-                    this.status = `\u5237\u65b0\u5931\u8d25\uff1a${error?.message || '\u672a\u77e5\u9519\u8bef'}`;
+                    this.status = `Refresh failed: ${error?.message || 'Unknown error'}`;
                     this.hasLoaded = true;
                 } finally {
                     this.loading = false;
@@ -374,7 +374,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
 
                 const note = this.noteValue.trim();
                 this.savingNote = true;
-                this.status = note ? '正在保存备注...' : '正在清除备注...';
+                this.status = note ? 'Saving note...' : 'Clearing note...';
 
                 try {
                     const updated = normalizePresetBackupPreviewItem(await updatePresetBackupPreviewNote(target.fileName, note));
@@ -386,11 +386,11 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                             searchText: `${item.name} ${note} ${item.createdAt}`.toLowerCase(),
                         })
                         : item);
-                    this.status = note ? '已保存备注' : '已清除备注';
+                    this.status = note ? 'Note saved' : 'Note cleared';
                     this.closeNoteDialog(true);
                 } catch (error) {
                     console.warn(`${LOG_PREFIX} Failed to update preset backup note`, error);
-                    this.status = `备注保存失败：${error?.message || '未知错误'}`;
+                    this.status = `Failed to save note: ${error?.message || 'Unknown error'}`;
                 } finally {
                     this.savingNote = false;
                 }
@@ -422,12 +422,12 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 }
 
                 if (!showName) {
-                    this.status = '\u5907\u4efd\u540d\u79f0\u4e0d\u80fd\u4e3a\u7a7a';
+                    this.status = 'Backup name cannot be empty';
                     return;
                 }
 
                 this.renaming = true;
-                this.status = '\u6b63\u5728\u91cd\u547d\u540d\u5907\u4efd...';
+                this.status = 'Renaming backup...';
 
                 try {
                     const updated = normalizePresetBackupPreviewItem(await renamePresetBackupPreviewItem(target.fileName, showName));
@@ -439,11 +439,11 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                             searchText: `${formatPresetBackupPreviewDisplayName(showName)} ${item.note || ''} ${item.createdAt}`.toLowerCase(),
                         })
                         : item);
-                    this.status = `\u5df2\u91cd\u547d\u540d\uff1a${formatPresetBackupPreviewDisplayName(showName)}`;
+                    this.status = `Renamed: ${formatPresetBackupPreviewDisplayName(showName)}`;
                     this.closeRenameDialog(true);
                 } catch (error) {
                     console.warn(`${LOG_PREFIX} Failed to rename preset backup`, error);
-                    this.status = `\u91cd\u547d\u540d\u5931\u8d25\uff1a${error?.message || '\u672a\u77e5\u9519\u8bef'}`;
+                    this.status = `Rename failed: ${error?.message || 'Unknown error'}`;
                 } finally {
                     this.renaming = false;
                 }
@@ -456,16 +456,16 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 }
 
                 this.deleting = true;
-                this.status = '\u6b63\u5728\u5220\u9664\u5907\u4efd...';
+                this.status = 'Deleting backup...';
 
                 try {
                     await deletePresetBackupPreviewItem(target.fileName);
                     this.items = this.items.filter(item => item.fileName !== target.fileName);
-                    this.status = `\u5df2\u5220\u9664\uff1a${target.name || target.fileName}`;
+                    this.status = `Deleted: ${target.name || target.fileName}`;
                     this.closeDeleteDialog(true);
                 } catch (error) {
                     console.warn(`${LOG_PREFIX} Failed to delete preset backup`, error);
-                    this.status = `\u5220\u9664\u5931\u8d25\uff1a${error?.message || '\u672a\u77e5\u9519\u8bef'}`;
+                    this.status = `Delete failed: ${error?.message || 'Unknown error'}`;
                 } finally {
                     this.deleting = false;
                 }
@@ -536,7 +536,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 const targets = this.items.filter(item => this.selectedFileNames.includes(item.fileName));
                 const total = targets.length;
                 this.batchDeleting = true;
-                this.status = `\u6b63\u5728\u5220\u9664\uff1a0 / ${total}`;
+                this.status = `Deleting: 0 / ${total}`;
 
                 let done = 0;
                 let failed = 0;
@@ -562,7 +562,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                             failedFileNames.push(target.fileName);
                         }
 
-                        this.status = `\u6b63\u5728\u5220\u9664\uff1a${done + failed} / ${total}`;
+                        this.status = `Deleting: ${done + failed} / ${total}`;
                     }
                 };
 
@@ -575,8 +575,8 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 // \u5931\u8d25\u7684\u9879\u4fdd\u6301\u9009\u4e2d\uff0c\u65b9\u4fbf\u7528\u6237\u91cd\u8bd5\uff1b\u5168\u90e8\u6210\u529f\u624d\u9000\u51fa\u9009\u62e9\u6a21\u5f0f\u3002
                 this.selectedFileNames = failedFileNames;
                 this.status = failed > 0
-                    ? `\u5df2\u5220\u9664 ${done} \u4e2a\uff0c${failed} \u4e2a\u5931\u8d25`
-                    : `\u5df2\u5220\u9664 ${done} \u4e2a\u5907\u4efd`;
+                    ? `Deleted ${done}, ${failed} failed`
+                    : `Deleted ${done} backups`;
 
                 if (this.selectedFileNames.length <= 0) {
                     this.selectionMode = false;
@@ -588,7 +588,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 }
 
                 this.importingFileName = item.fileName;
-                this.status = `\u6b63\u5728\u5bfc\u5165\uff1a${item.name || item.fileName}`;
+                this.status = `Importing: ${item.name || item.fileName}`;
 
                 try {
                     const result = await downloadPresetBackupPreviewItem(item.fileName);
@@ -611,19 +611,19 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                         }
                     }
 
-                    this.status = `\u5df2\u5bfc\u5165\u5e76\u5207\u6362\uff1a${importName}`;
+                    this.status = `Imported and switched: ${importName}`;
                 } catch (error) {
                     console.warn(`${LOG_PREFIX} Failed to import preset backup`, error);
-                    this.status = `\u5bfc\u5165\u5931\u8d25\uff1a${error?.message || '\u672a\u77e5\u9519\u8bef'}`;
+                    this.status = `Import failed: ${error?.message || 'Unknown error'}`;
                 } finally {
                     this.importingFileName = '';
                 }
             },
             setActionStatus(action, item) {
-                const name = item?.name || '\u8fd9\u4e2a\u5907\u4efd';
+                const name = item?.name || 'this backup';
                 const labels = {
-                    delete: '\u5220\u9664\u63a5\u53e3\u5f85\u63a5\u5165\uff1a',
-                    download: '\u4e0b\u8f7d\u63a5\u53e3\u5f85\u63a5\u5165\uff1a',
+                    delete: 'Delete API not connected yet:',
+                    download: 'Download API not connected yet:',
                 };
 
                 this.status = `${labels[action] || ''}${name}`;
@@ -647,10 +647,10 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                 }, [
                     h('span', { class: 'bai-bai-preset-backup-title' }, [
                         h('i', { class: 'fa-solid fa-clock-rotate-left' }),
-                        h('span', '\u81ea\u52a8\u5907\u4efd\u9884\u8bbe'),
+                        h('span', 'Preset auto-backup'),
                     ]),
                     h('span', { class: 'bai-bai-preset-backup-summary-meta' }, [
-                        h('small', '\u5907\u4efd\u5217\u8868'),
+                        h('small', 'Backup list'),
                         h('i', { class: 'fa-solid fa-chevron-right bai-bai-preset-backup-chevron' }),
                     ]),
                 ]),
@@ -663,7 +663,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                                 type: 'search',
                                 autocomplete: 'off',
                                 style: 'padding-left: 36px !important; background: transparent !important;',
-                                placeholder: '\u641c\u7d22\u5907\u4efd\u9884\u8bbe',
+                                placeholder: 'Search backed-up presets',
                                 value: this.query,
                                 onInput: this.onSearchInput,
                                 onCompositionstart: this.onSearchCompositionStart,
@@ -678,7 +678,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                                 'bai-bai-preset-backup-batch-active': this.selectionMode,
                             },
                             type: 'button',
-                            title: this.selectionMode ? '\u9000\u51fa\u6279\u91cf\u7ba1\u7406' : '\u6279\u91cf\u7ba1\u7406',
+                            title: this.selectionMode ? 'Exit bulk manage' : 'Bulk manage',
                             disabled: this.loading || this.batchDeleting,
                             onClick: this.toggleSelectionMode,
                         }, [h('i', { class: 'fa-solid fa-list-check' })]),
@@ -690,7 +690,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                                 'bai-bai-preset-backup-refreshing': this.loading,
                             },
                             type: 'button',
-                            title: '\u5237\u65b0\u5907\u4efd\u5217\u8868',
+                            title: 'Refresh backup list',
                             disabled: this.loading,
                             onClick: this.refresh,
                         }, [h('i', { class: 'fa-solid fa-rotate-right' })]),
@@ -699,28 +699,28 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                         class: 'bai-bai-preset-backup-counts',
                         'aria-live': 'polite',
                     }, [
-                        h('span', `普通 ${this.items.length - this.protectedCount} 份`),
-                        h('span', { title: '有备注的备份免自动清理，不占普通备份名额' }, [
+                        h('span', `${this.items.length - this.protectedCount} regular`),
+                        h('span', { title: 'Backups with a note are exempt from auto-cleanup and do not count toward the regular limit' }, [
                             h('i', { class: 'fa-solid fa-lock', 'aria-hidden': 'true' }),
-                            ` 已保护 ${this.protectedCount} 份`,
+                            ` ${this.protectedCount} protected`,
                         ]),
                     ]) : null,
                     this.selectionMode ? renderPresetBackupSelectionBar(h, this) : null,
                     h('div', { class: 'bai-bai-preset-backup-list', role: 'list' }, this.pagedItems.length
                         ? this.pagedItems.map(item => renderPresetBackupPreviewItem(h, this, item))
                         : [h('div', { class: 'bai-bai-preset-backup-empty' }, this.hasLoaded
-                            ? '\u6682\u65e0\u5907\u4efd\u6570\u636e'
+                            ? 'No backups yet'
                             : [
-                                h('span', '\u5237\u65b0\u83b7\u53d6\u5907\u4efd\u6570\u636e'),
-                                h('span', '\u4fdd\u5b58\u9884\u8bbe\u65f6\u81ea\u52a8\u521b\u5efa\u5907\u4efd'),
+                                h('span', 'Refresh to load backups'),
+                                h('span', 'Backups are created automatically when a preset is saved'),
                             ])]),
                     h('div', { class: 'bai-bai-preset-backup-footer' }, [
                         h('div', { class: 'bai-bai-preset-backup-status' }, this.displayStatus),
-                        h('div', { class: 'bai-bai-preset-backup-pagination', 'aria-label': '\u5907\u4efd\u5206\u9875' }, [
+                        h('div', { class: 'bai-bai-preset-backup-pagination', 'aria-label': 'Backup pages' }, [
                             h('button', {
                                 class: 'menu_button menu_button_icon',
                                 type: 'button',
-                                title: '\u4e0a\u4e00\u9875',
+                                title: 'Previous',
                                 disabled: this.safePage <= 1 || this.filteredItems.length <= 0,
                                 onClick: this.prevPage,
                             }, [h('i', { class: 'fa-solid fa-chevron-left' })]),
@@ -728,7 +728,7 @@ function createPresetBackupPreviewRootComponent(vue, model) {
                             h('button', {
                                 class: 'menu_button menu_button_icon',
                                 type: 'button',
-                                title: '\u4e0b\u4e00\u9875',
+                                title: 'Next',
                                 disabled: this.safePage >= this.pageCount || this.filteredItems.length <= 0,
                                 onClick: this.nextPage,
                             }, [h('i', { class: 'fa-solid fa-chevron-right' })]),
@@ -775,18 +775,18 @@ function renderPresetBackupPreviewItem(h, view, item) {
                     renderPresetBackupPreviewActionButton(h, {
                         className: 'bai-bai-preset-backup-delete',
                         icon: 'fa-solid fa-trash',
-                        title: '\u5220\u9664\u5907\u4efd',
+                        title: 'Delete backup',
                         onClick: () => view.openDeleteDialog(item),
                     }),
                     renderPresetBackupPreviewActionButton(h, {
                         icon: 'fa-solid fa-pen-to-square',
-                        title: '\u91cd\u547d\u540d\u5907\u4efd',
+                        title: 'Rename backup',
                         onClick: () => view.openRenameDialog(item),
                     }),
                     renderPresetBackupPreviewActionButton(h, {
                         className: view.importingFileName === item.fileName ? 'bai-bai-preset-backup-importing' : '',
                         icon: view.importingFileName === item.fileName ? 'fa-solid fa-spinner' : 'fa-solid fa-download',
-                        title: '\u5bfc\u5165\u5907\u4efd\u5e76\u5207\u6362',
+                        title: 'Import backup and switch',
                         disabled: Boolean(view.importingFileName),
                         onClick: () => view.importBackup(item),
                     }),
@@ -812,16 +812,16 @@ function renderPresetBackupSelectionBar(h, view) {
             onClick: () => view.toggleSelectPage(),
         }, [
             h('i', { class: view.pageAllSelected ? 'fa-solid fa-square-check' : 'fa-regular fa-square' }),
-            h('span', view.pageAllSelected ? '\u53d6\u6d88\u672c\u9875' : '\u5168\u9009\u672c\u9875'),
+            h('span', view.pageAllSelected ? 'Deselect page' : 'Select page'),
         ]),
-        h('span', { class: 'bai-bai-preset-backup-selection-count' }, `\u5df2\u9009 ${view.selectedCount} \u9879`),
+        h('span', { class: 'bai-bai-preset-backup-selection-count' }, `${view.selectedCount} selected`),
         h('div', { class: 'bai-bai-preset-backup-selection-actions' }, [
             h('button', {
                 class: 'menu_button bai-bai-preset-backup-dialog-button',
                 type: 'button',
                 disabled: view.batchDeleting,
                 onClick: () => view.exitSelectionMode(),
-            }, '\u9000\u51fa'),
+            }, 'Exit'),
             h('button', {
                 class: 'menu_button bai-bai-preset-backup-dialog-button bai-bai-preset-backup-dialog-danger',
                 type: 'button',
@@ -829,7 +829,7 @@ function renderPresetBackupSelectionBar(h, view) {
                 onClick: () => view.openBatchDeleteDialog(),
             }, [
                 h('i', { class: 'fa-solid fa-trash' }),
-                h('span', view.batchDeleting ? '\u5220\u9664\u4e2d...' : `\u5220\u9664\u6240\u9009 (${view.selectedCount})`),
+                h('span', view.batchDeleting ? 'Deleting...' : `Delete selected (${view.selectedCount})`),
             ]),
         ]),
     ]);
@@ -851,7 +851,8 @@ function renderPresetBackupPreviewNote(h, view, item) {
         return h('button', {
             type: 'button',
             class: 'bai-bai-preset-backup-item-note',
-            title: `${item.note}\n已保护，免自动清理（点击编辑备注）`,
+            title: `${item.note}
+Protected from auto-cleanup (click to edit note)`,
             onClick,
         }, [
             h('i', { class: 'fa-solid fa-lock' }),
@@ -862,16 +863,16 @@ function renderPresetBackupPreviewNote(h, view, item) {
     return h('button', {
         type: 'button',
         class: 'bai-bai-preset-backup-item-note bai-bai-preset-backup-item-note-empty',
-        title: '添加备注并保护备份，免自动清理',
+        title: 'Add a note to protect this backup from auto-cleanup',
         onClick,
     }, [
         h('i', { class: 'fa-solid fa-plus' }),
-        h('span', '备注'),
+        h('span', 'Note'),
     ]);
 }
 
 function renderPresetBackupNoteDialog(h, view) {
-    const targetName = view.noteTarget?.name || '这个备份';
+    const targetName = view.noteTarget?.name || 'this backup';
     const length = view.noteValue.length;
 
     return h('div', {
@@ -886,30 +887,30 @@ function renderPresetBackupNoteDialog(h, view) {
             class: 'bai-bai-preset-backup-dialog',
             role: 'dialog',
             'aria-modal': 'true',
-            'aria-label': '编辑备注',
+            'aria-label': 'Edit note',
             onClick: event => event.stopPropagation(),
         }, [
             h('div', { class: 'bai-bai-preset-backup-dialog-head' }, [
-                h('strong', '编辑备注'),
+                h('strong', 'Edit note'),
                 h('button', {
                     class: 'menu_button menu_button_icon',
                     type: 'button',
-                    title: '关闭',
+                    title: 'Close',
                     disabled: view.savingNote,
                     onClick: () => view.closeNoteDialog(),
                 }, [h('i', { class: 'fa-solid fa-xmark' })]),
             ]),
             h('div', { class: 'bai-bai-preset-backup-dialog-message' }, [
-                h('span', '为'),
+                h('span', 'for'),
                 h('strong', { title: targetName }, targetName),
-                h('span', '记录这次改动'),
+                h('span', 'Record this change'),
             ]),
             h('textarea', {
                 ref: 'noteInput',
                 class: 'text_pole bai-bai-preset-backup-dialog-input bai-bai-preset-backup-note-textarea',
                 rows: 4,
                 maxlength: PRESET_BACKUP_PREVIEW_NOTE_MAX_LENGTH,
-                placeholder: '例如：改了正则和开场白，删了两条无用条目…',
+                placeholder: 'e.g. changed the regex and the greeting, removed two unused entries…',
                 autocomplete: 'off',
                 value: view.noteValue,
                 disabled: view.savingNote,
@@ -924,13 +925,13 @@ function renderPresetBackupNoteDialog(h, view) {
                     type: 'button',
                     disabled: view.savingNote,
                     onClick: () => view.closeNoteDialog(),
-                }, '取消'),
+                }, 'Cancel'),
                 h('button', {
                     class: 'menu_button bai-bai-preset-backup-dialog-button',
                     type: 'button',
                     disabled: view.savingNote,
                     onClick: () => view.confirmNote(),
-                }, view.savingNote ? '保存中...' : '保存'),
+                }, view.savingNote ? 'Saving...' : 'Save'),
             ]),
         ]),
     ]);
@@ -938,7 +939,7 @@ function renderPresetBackupNoteDialog(h, view) {
 
 function renderPresetBackupDeleteDialog(h, view) {
     const isBatch = !view.deleteTarget && view.selectionMode;
-    const targetName = view.deleteTarget?.name || '\u8fd9\u4e2a\u5907\u4efd';
+    const targetName = view.deleteTarget?.name || 'this backup';
     const busy = isBatch ? view.batchDeleting : view.deleting;
 
     return h('div', {
@@ -953,25 +954,25 @@ function renderPresetBackupDeleteDialog(h, view) {
             class: 'bai-bai-preset-backup-dialog',
             role: 'dialog',
             'aria-modal': 'true',
-            'aria-label': '\u5220\u9664\u5907\u4efd',
+            'aria-label': 'Delete backup',
             onClick: event => event.stopPropagation(),
         }, [
             h('div', { class: 'bai-bai-preset-backup-dialog-head' }, [
-                h('strong', isBatch ? '\u6279\u91cf\u5220\u9664\u5907\u4efd' : '\u5220\u9664\u5907\u4efd'),
+                h('strong', isBatch ? 'Bulk delete backups' : 'Delete backup'),
                 h('button', {
                     class: 'menu_button menu_button_icon',
                     type: 'button',
-                    title: '\u5173\u95ed',
+                    title: 'Close',
                     disabled: busy,
                     onClick: () => view.closeDeleteDialog(),
                 }, [h('i', { class: 'fa-solid fa-xmark' })]),
             ]),
             isBatch
                 ? h('div', { class: 'bai-bai-preset-backup-dialog-message' }, [
-                    h('span', `\u786e\u5b9a\u8981\u5220\u9664\u9009\u4e2d\u7684 ${view.selectedCount} \u4e2a\u5907\u4efd\u5417\uff1f\u6b64\u64cd\u4f5c\u4e0d\u53ef\u6062\u590d\u3002`),
+                    h('span', `Delete the ${view.selectedCount} selected backups? This cannot be undone.`),
                 ])
                 : h('div', { class: 'bai-bai-preset-backup-dialog-message' }, [
-                    h('span', '\u786e\u5b9a\u8981\u5220\u9664\u8fd9\u4e2a\u5907\u4efd\u5417\uff1f'),
+                    h('span', 'Delete this backup?'),
                     h('strong', { title: targetName }, targetName),
                 ]),
             h('div', { class: 'bai-bai-preset-backup-dialog-actions' }, [
@@ -980,13 +981,13 @@ function renderPresetBackupDeleteDialog(h, view) {
                     type: 'button',
                     disabled: busy,
                     onClick: () => view.closeDeleteDialog(),
-                }, '\u53d6\u6d88'),
+                }, 'Cancel'),
                 h('button', {
                     class: 'menu_button bai-bai-preset-backup-dialog-button bai-bai-preset-backup-dialog-danger',
                     type: 'button',
                     disabled: busy,
                     onClick: () => (isBatch ? view.confirmBatchDelete() : view.confirmDelete()),
-                }, busy ? '\u5220\u9664\u4e2d...' : '\u5220\u9664'),
+                }, busy ? 'Deleting...' : 'Delete'),
             ]),
         ]),
     ]);
@@ -1005,15 +1006,15 @@ function renderPresetBackupRenameDialog(h, view) {
             class: 'bai-bai-preset-backup-dialog',
             role: 'dialog',
             'aria-modal': 'true',
-            'aria-label': '\u91cd\u547d\u540d\u5907\u4efd',
+            'aria-label': 'Rename backup',
             onClick: event => event.stopPropagation(),
         }, [
             h('div', { class: 'bai-bai-preset-backup-dialog-head' }, [
-                h('strong', '\u91cd\u547d\u540d\u5907\u4efd'),
+                h('strong', 'Rename backup'),
                 h('button', {
                     class: 'menu_button menu_button_icon',
                     type: 'button',
-                    title: '\u5173\u95ed',
+                    title: 'Close',
                     disabled: view.renaming,
                     onClick: () => view.closeRenameDialog(),
                 }, [h('i', { class: 'fa-solid fa-xmark' })]),
@@ -1036,13 +1037,13 @@ function renderPresetBackupRenameDialog(h, view) {
                     type: 'button',
                     disabled: view.renaming,
                     onClick: () => view.closeRenameDialog(),
-                }, '\u53d6\u6d88'),
+                }, 'Cancel'),
                 h('button', {
                     class: 'menu_button bai-bai-preset-backup-dialog-button',
                     type: 'button',
                     disabled: view.renaming || !view.renameValue.trim(),
                     onClick: () => view.confirmRename(),
-                }, view.renaming ? '\u4fdd\u5b58\u4e2d...' : '\u4fdd\u5b58'),
+                }, view.renaming ? 'Saving...' : 'Save'),
             ]),
         ]),
     ]);
@@ -1135,7 +1136,7 @@ function normalizePresetBackupImportPayload(result, item) {
 
     return {
         apiId,
-        name: name || '\u5907\u4efd\u9884\u8bbe',
+        name: name || 'Back up preset',
         preset: clonePresetBackupImportPreset(preset),
     };
 }
@@ -1149,7 +1150,7 @@ function clonePresetBackupImportPreset(preset) {
 }
 
 function getUniquePresetBackupImportName(manager, name) {
-    const baseName = String(name || '\u5907\u4efd\u9884\u8bbe').trim() || '\u5907\u4efd\u9884\u8bbe';
+    const baseName = String(name || 'Back up preset').trim() || 'Back up preset';
     const existingNames = typeof manager.getAllPresets === 'function'
         ? manager.getAllPresets().map(value => String(value))
         : [];
@@ -1224,7 +1225,7 @@ function formatPresetBackupPreviewTime(value) {
         return value.trim();
     }
 
-    return '\u65f6\u95f4\u672a\u77e5';
+    return 'Time unknown';
 }
 
 function togglePresetBackupPreviewDetails(details, model = null) {

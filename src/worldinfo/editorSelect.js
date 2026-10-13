@@ -697,11 +697,11 @@ function getWorldInfoEditorSelectGroups(nativeOrderNames) {
     const otherNames = nativeOrderNames.filter(name => !reservedNames.has(name));
 
     return [
-        { label: '当前开启的全局世界书', names: orderWorldInfoNames(globalNames, nativeOrderNames) },
-        { label: '角色卡世界书', names: orderWorldInfoNames(characterPrimaryNames, nativeOrderNames) },
-        { label: '附加角色世界书', names: orderWorldInfoNames(characterAdditionalNames, nativeOrderNames) },
-        { label: '聊天世界书', names: orderWorldInfoNames(chatNames, nativeOrderNames) },
-        { label: '其他世界书', names: otherNames },
+        { label: 'Currently active global World Info', names: orderWorldInfoNames(globalNames, nativeOrderNames) },
+        { label: 'Character card World Info', names: orderWorldInfoNames(characterPrimaryNames, nativeOrderNames) },
+        { label: 'Additional character World Info', names: orderWorldInfoNames(characterAdditionalNames, nativeOrderNames) },
+        { label: 'Chat World Info', names: orderWorldInfoNames(chatNames, nativeOrderNames) },
+        { label: 'Other World Info', names: otherNames },
     ];
 }
 

@@ -1014,7 +1014,7 @@ function formatPresetEffectiveTokenHeaderText(value) {
     }
 
     const total = Number(value);
-    return `预设总Token: ${Number.isFinite(total) ? Math.max(0, Math.round(total)) : 0}`;
+    return `Preset total tokens: ${Number.isFinite(total) ? Math.max(0, Math.round(total)) : 0}`;
 }
 
 function updatePresetEffectiveTokenHeaderDisplay(value = undefined) {

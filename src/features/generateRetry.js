@@ -98,7 +98,7 @@ function openGenerateRetryWindow(state, type, dryRun) {
     if (!GENERATE_RETRY_MESSAGE_TYPES.has(normalizedType)) return;
     // 停止落在酒馆重建 abortController 之前时,同一代仍会走到这里;不要重新武装。
     if (isCurrentGenerationStopped()) {
-        console.debug(`${LOG_PREFIX} [请求重试] 启动窗口内已停止,本代不再武装重试`);
+        console.debug(`${LOG_PREFIX} [Request retry] Stopped within the start window; not arming retries for this generation`);
         return;
     }
     state.nativeWindow = {
@@ -230,7 +230,7 @@ async function describeGenerateRetryFailure(request, response) {
         }
 
         // 不读响应体,原样留给酒馆自己解析并展示错误信息。
-        return `请求失败（HTTP ${response.status}）`;
+        return `Request failed (HTTP ${response.status})`;
     }
 
     // 流式响应此时只拿到响应头,正文中途断流已经交给酒馆渲染,不能在这一层重放。
@@ -247,15 +247,15 @@ async function describeGenerateRetryFailure(request, response) {
     }
 
     const message = typeof data.error === 'string' ? data.error : data.error?.message;
-    return message ? `接口返回错误（${truncateGenerateRetryReason(message)}）` : '接口返回错误';
+    return message ? `API returned an error (${truncateGenerateRetryReason(message)})` : 'API returned an error';
 }
 
 function describeGenerateRetryError(error) {
     if (String(error?.name || '') === 'TimeoutError') {
-        return '请求超时';
+        return 'Request timed out';
     }
 
-    return '网络请求失败';
+    return 'Network request failed';
 }
 
 function consumeGenerateRetryAttempt(budget) {
@@ -276,8 +276,8 @@ async function waitBeforeGenerateRetry(state, request, budget, reason) {
     const maxRetries = budget.maxRetries;
     const delay = Math.min(GENERATE_RETRY_BASE_DELAY_MS * (2 ** (attempt - 1)), GENERATE_RETRY_MAX_DELAY_MS);
     globalThis.toastr?.warning(
-        `${reason}，${Math.round(delay / 100) / 10} 秒后重试（第 ${attempt}/${maxRetries} 次）`,
-        '生成失败自动重试',
+        `${reason}; retrying in ${Math.round(delay / 100) / 10} seconds (attempt ${attempt}/${maxRetries})`,
+        'Auto-retry on generation failure',
         { timeOut: Math.max(delay, 2000) },
     );
 

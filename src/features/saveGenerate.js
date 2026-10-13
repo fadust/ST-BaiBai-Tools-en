@@ -143,7 +143,7 @@ function installSaveGenerateFetchHook() {
                 clearSaveGenerateLocalRequestGuard(state, localRequestGuard);
                 throw error;
             }
-            console.warn(`${LOG_PREFIX} [后台接管] save-generate path failed; falling back to native fetch`, error);
+            console.warn(`${LOG_PREFIX} [Background takeover] save-generate path failed; falling back to native fetch`, error);
             try {
                 const response = await state.originalFetch(input, init);
                 return guardSaveGenerateResponseUntilBodyDone(state, localRequestGuard, response);
@@ -499,7 +499,7 @@ async function fetchSaveGenerate(state, requestInfo, input, init) {
         if (response?.status === 404) {
             markSaveGenerateBackendAvailable(state, false);
             clearActiveSaveGenerateCancelTarget(state, cancelTarget);
-            console.warn(`${LOG_PREFIX} [后台接管] save-generate endpoint unavailable; falling back to native generate`);
+            console.warn(`${LOG_PREFIX} [Background takeover] save-generate endpoint unavailable; falling back to native generate`);
             return state.originalFetch(input, init);
         }
         markSaveGenerateBackendAvailable(state, response?.ok || response?.status !== 404);
@@ -634,7 +634,7 @@ async function cancelActiveSaveGenerateJobFromNativeStop(state) {
         if (canceledJob.id) {
             finishSaveGenerateCanceledDisplay(state, canceledJob);
         } else {
-            showSaveGenerateInfoToast('柏宝库后台生成已停止');
+            showSaveGenerateInfoToast('BaiBaoKu background generation stopped');
         }
     } catch (error) {
         target.cancelRequested = false;
@@ -1600,7 +1600,7 @@ function refreshSaveGenerateRecoveryUiLock(state) {
             if (!element.dataset.baibaokuSaveGenerateRecoveryTitle) {
                 element.dataset.baibaokuSaveGenerateRecoveryTitle = element.getAttribute('title') || '';
             }
-            element.setAttribute('title', '柏宝库后台生成恢复中，请稍后再发送');
+            element.setAttribute('title', 'BaiBaoKu background generation is recovering; please wait before sending');
             element.setAttribute('aria-disabled', 'true');
             element.classList.add('bai-bai-save-generate-recovery-disabled');
             continue;
@@ -1623,7 +1623,7 @@ function refreshSaveGenerateRecoveryUiLock(state) {
 function buildSaveGenerateRecoveryBlockedResponse(lock) {
     return new Response(JSON.stringify({
         error: {
-            message: '柏宝库后台生成恢复中，请稍后再发送。',
+            message: 'BaiBaoKu background generation is recovering; please wait before sending.',
         },
         baibaokuSaveGenerateRecoveryBlocked: true,
         jobId: lock?.jobId || '',
@@ -1645,7 +1645,7 @@ function showSaveGenerateRecoveryBlockToast(state) {
     if (state) {
         state.lastRecoveryBlockToastAt = now;
     }
-    showSaveGenerateInfoToast('柏宝库后台生成恢复中，请稍后再发送');
+    showSaveGenerateInfoToast('BaiBaoKu background generation is recovering; please wait before sending');
 }
 
 function isSaveGenerateKnownLocalJob(state, jobId) {
@@ -2001,7 +2001,7 @@ function updateSaveGenerateResumeDisplay(state, job) {
     }
 
     if (isSaveGenerateSavedStatus(job.status)) {
-        display.complete({ label: '柏宝库生成已保存，正在恢复消息...', delay: 1500 });
+        display.complete({ label: 'BaiBaoKu generation saved; restoring the message...', delay: 1500 });
         scheduleSaveGenerateDisplayCleanup(state, job.id);
         return;
     }
@@ -2020,12 +2020,12 @@ function updateSaveGenerateResumeDisplay(state, job) {
 async function stopSaveGenerateResumeJob(state, jobId) {
     const display = state?.resumeDisplays?.get(jobId);
     if (!state?.originalFetch || !jobId) {
-        display?.setLabel('柏宝库无法停止后台生成');
+        display?.setLabel('BaiBaoKu cannot stop the background generation');
         return;
     }
 
     try {
-        display?.setLabel('柏宝库正在停止后台生成...');
+        display?.setLabel('BaiBaoKu is stopping the background generation...');
         const canceledJob = await cancelSaveGenerateJob(state.originalFetch, jobId);
         const job = {
             id: jobId,
@@ -2035,7 +2035,7 @@ async function stopSaveGenerateResumeJob(state, jobId) {
         finishSaveGenerateCanceledDisplay(state, job);
     } catch (error) {
         console.debug(`${LOG_PREFIX} save-generate cancel failed`, error);
-        display?.setLabel('柏宝库停止失败，后台生成仍在继续...');
+        display?.setLabel('BaiBaoKu failed to stop; background generation is still running...');
     }
 }
 
@@ -2060,12 +2060,12 @@ function finishSaveGenerateCanceledDisplay(state, job) {
     const display = state?.resumeDisplays?.get(job.id);
     display?.hide();
     state?.resumeDisplays?.delete(job.id);
-    showSaveGenerateInfoToast('柏宝库后台生成已停止');
+    showSaveGenerateInfoToast('BaiBaoKu background generation stopped');
 }
 
 function showSaveGenerateInfoToast(message) {
     if (typeof globalThis.toastr?.info === 'function') {
-        globalThis.toastr.info(message, '柏宝库');
+        globalThis.toastr.info(message, 'BaiBaoKu');
     }
 }
 
@@ -2081,21 +2081,21 @@ function scheduleSaveGenerateDisplayCleanup(state, jobId) {
 function getSaveGenerateDisplayLabel(job) {
     const status = String(job?.status || '');
     if (isSaveGenerateSavedStatus(status)) {
-        return '柏宝库生成已保存，正在恢复消息...';
+        return 'BaiBaoKu generation saved; restoring the message...';
     }
     if (status === 'failed') {
-        return '柏宝库后台生成失败';
+        return 'BaiBaoKu background generation failed';
     }
     if (status === 'canceled') {
-        return '柏宝库后台生成已停止';
+        return 'BaiBaoKu background generation stopped';
     }
     if (status === 'conflict') {
-        return '柏宝库已生成内容，但未能自动保存';
+        return 'BaiBaoKu generated content but could not save it automatically';
     }
     if (status === 'saving') {
-        return '柏宝库正在保存生成内容...';
+        return 'BaiBaoKu is saving the generated content...';
     }
-    return '柏宝库后台生成中...';
+    return 'BaiBaoKu background generation running...';
 }
 
 function monitorSaveGenerateJob(state, job, chatId, reason = 'unknown') {

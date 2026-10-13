@@ -71,7 +71,7 @@ export function getPresetBackupCleanupPlan(items, keepCount) {
             || names.has(fileName) || !Number.isFinite(createdAtMs) || createdAtMs <= 0
             || typeof item.note !== 'string'
         ) {
-            throw new Error('\u5907\u4efd\u5217\u8868\u7f3a\u5c11\u5b8c\u6574\u65f6\u95f4\u6216\u5907\u6ce8\u4fe1\u606f\uff0c\u5df2\u505c\u6b62\u6e05\u7406');
+            throw new Error('The backup list is missing full time or note information; cleanup stopped');
         }
         names.add(fileName);
         return { fileName, createdAtMs, protected: Boolean(item.note.trim()) };
@@ -130,8 +130,8 @@ export function schedulePresetBackupCleanup() {
         cleanupRequested = false;
         console.warn(`${LOG_PREFIX} Preset backup cleanup stopped`, error);
         globalThis.toastr?.warning(
-            '\u5907\u4efd\u81ea\u52a8\u6e05\u7406\u672a\u5b8c\u6210\uff0c\u5df2\u505c\u6b62\u5220\u9664\uff1b\u4e0b\u6b21\u6210\u529f\u5907\u4efd\u540e\u91cd\u8bd5\u3002',
-            '\u9884\u8bbe\u5907\u4efd',
+            'Backup auto-cleanup did not finish and deletion stopped; it will retry after the next successful backup.',
+            'Preset backup',
         );
     }).finally(() => {
         cleanupPromise = null;
@@ -141,14 +141,14 @@ export function schedulePresetBackupCleanup() {
 
 async function confirmPresetBackupCleanup(plan, keepCount) {
     const result = await callGenericPopup(`
-        <h3>\u81ea\u52a8\u6e05\u7406\u65e7\u5907\u4efd</h3>
-        <p>\u6240\u6709\u9884\u8bbe\u5408\u8ba1\u4fdd\u7559\u6700\u65b0 ${keepCount} \u4efd\u666e\u901a\u5907\u4efd\u3002</p>
-        <p>\u5f53\u524d\u666e\u901a\u5907\u4efd ${plan.ordinaryCount} \u4efd\uff0c\u6709\u5907\u6ce8\u7684\u53d7\u4fdd\u62a4\u5907\u4efd ${plan.protectedCount} \u4efd\u3002</p>
-        <p>\u9884\u8ba1\u5220\u9664\u6700\u65e7\u7684 <strong>${plan.targets.length}</strong> \u4efd\u666e\u901a\u5907\u4efd\uff0c\u5220\u9664\u4e0d\u53ef\u64a4\u9500\u3002</p>
-        <p>\u6709\u5907\u6ce8\u7684\u5907\u4efd\u4e0d\u5220\u9664\u3001\u4e0d\u5360\u540d\u989d\uff1b\u6b64\u540e\u6bcf\u6b21\u6210\u529f\u5907\u4efd\u540e\u9759\u9ed8\u6e05\u7406\u8d85\u9650\u5907\u4efd\uff0c\u4e0d\u518d\u5f39\u7a97\u3002</p>
+        <h3>Auto-clean old backups</h3>
+        <p>Keep the newest ${keepCount} regular backups across all presets.</p>
+        <p>Currently ${plan.ordinaryCount} regular backups and ${plan.protectedCount} protected backups with notes.</p>
+        <p>The oldest <strong>${plan.targets.length}</strong> regular backups will be deleted. This cannot be undone.</p>
+        <p>Backups with notes are never deleted and do not count. After this, backups over the limit are cleaned up silently after each successful backup, with no popup.</p>
     `, POPUP_TYPE.CONFIRM, '', {
-        okButton: '\u786e\u8ba4\u5e76\u542f\u7528',
-        cancelButton: '\u53d6\u6d88',
+        okButton: 'Confirm and enable',
+        cancelButton: 'Cancel',
     });
     return result === POPUP_RESULT.AFFIRMATIVE;
 }
@@ -156,7 +156,7 @@ async function confirmPresetBackupCleanup(plan, keepCount) {
 export async function changePresetBackupRetentionSettings(enabled, keepCount) {
     if (changingSettings) return false;
     if (!isValidPresetBackupKeepCount(keepCount)) {
-        throw new Error('\u4fdd\u7559\u6570\u91cf\u5fc5\u987b\u662f\u5927\u4e8e\u96f6\u7684\u6574\u6570');
+        throw new Error('The number to keep must be a whole number greater than zero');
     }
     const needsConfirmation = enabled && (
         settings.presetBackupAutoCleanupEnabled !== true
@@ -197,13 +197,13 @@ export function bindPresetBackupRetentionSettings(container) {
         const keepCount = count.valueAsNumber;
         toggle.disabled = count.disabled = true;
         status.hidden = false;
-        status.textContent = '\u6b63\u5728\u5904\u7406...';
+        status.textContent = 'Working...';
         try {
             await changePresetBackupRetentionSettings(enabled, keepCount);
             status.hidden = true;
         } catch (error) {
             console.warn(`${LOG_PREFIX} Failed to change backup retention settings`, error);
-            status.textContent = `\u8bbe\u7f6e\u672a\u66f4\u6539\uff1a${error.message}`;
+            status.textContent = `Settings unchanged: ${error.message}`;
         } finally {
             sync();
             toggle.disabled = count.disabled = false;

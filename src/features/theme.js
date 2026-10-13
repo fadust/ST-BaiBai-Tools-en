@@ -381,7 +381,7 @@ function showBaibaokuThemeLoadingOverlay(state, target) {
         : BAIBAOKU_THEME_LOADING_OVERLAY_CLASS;
     overlay.setAttribute('role', 'status');
     overlay.setAttribute('aria-live', 'polite');
-    overlay.innerHTML = `<span class="${BAIBAOKU_THEME_LOADING_SPINNER_CLASS}" aria-hidden="true"></span><span>正在加载美化主题...</span>`;
+    overlay.innerHTML = `<span class="${BAIBAOKU_THEME_LOADING_SPINNER_CLASS}" aria-hidden="true"></span><span>Loading theme...</span>`;
 
     if (!fixed) {
         host.classList.add(BAIBAOKU_THEME_LOADING_HOST_CLASS);
@@ -923,7 +923,7 @@ function applyBaibaokuLazyThemeLoadingOptimization() {
                     setBaibaokuSelectValue('themes', previousThemeName);
                 }
                 if (globalThis.toastr?.error) {
-                    globalThis.toastr.error(`美化主题加载失败：${error?.message || String(error)}`, '柏宝库');
+                    globalThis.toastr.error(`Theme failed to load: ${error?.message || String(error)}`, 'BaiBaoKu');
                 }
             })
             .finally(() => {

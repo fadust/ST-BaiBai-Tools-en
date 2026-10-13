@@ -452,7 +452,7 @@ function applyWorldInfoMobileExpandedLayout(edit) {
     const extraHeader = document.createElement('div');
     extraHeader.className = 'bai-bai-wi-mobile-expanded-extra-toggle inline-drawer-header inline-drawer-header-pointer';
     const extraTitle = document.createElement('strong');
-    extraTitle.textContent = '更多设置';
+    extraTitle.textContent = 'More settings';
     const extraIcon = document.createElement('div');
     extraIcon.className = 'fa-solid fa-circle-chevron-down inline-drawer-icon down';
     extraHeader.append(extraTitle, extraIcon);

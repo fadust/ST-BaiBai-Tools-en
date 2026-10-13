@@ -38,7 +38,7 @@ function installWorldInfoSearchReplacePanel(state = getWorldInfoVueListOptimizat
 
     const title = document.createElement('span');
     title.className = 'bai-bai-wi-search-replace-title';
-    title.textContent = '查找替换';
+    title.textContent = 'Find and replace';
 
     const summary = document.createElement('span');
     summary.className = 'bai-bai-wi-search-replace-summary';
@@ -60,13 +60,13 @@ function installWorldInfoSearchReplacePanel(state = getWorldInfoVueListOptimizat
     const findInput = document.createElement('input');
     findInput.type = 'text';
     findInput.className = 'text_pole bai-bai-wi-search-replace-find';
-    findInput.placeholder = '查找正文内容';
+    findInput.placeholder = 'Find in content';
     findInput.autocomplete = 'off';
 
     const replaceInput = document.createElement('input');
     replaceInput.type = 'text';
     replaceInput.className = 'text_pole bai-bai-wi-search-replace-replace';
-    replaceInput.placeholder = '替换为';
+    replaceInput.placeholder = 'Replace with';
     replaceInput.autocomplete = 'off';
 
     const caseLabel = document.createElement('label');
@@ -74,7 +74,7 @@ function installWorldInfoSearchReplacePanel(state = getWorldInfoVueListOptimizat
     const caseInput = document.createElement('input');
     caseInput.type = 'checkbox';
     const caseText = document.createElement('span');
-    caseText.textContent = '区分大小写';
+    caseText.textContent = 'Match case';
     caseLabel.append(caseInput, caseText);
 
     const commentLabel = document.createElement('label');
@@ -82,18 +82,18 @@ function installWorldInfoSearchReplacePanel(state = getWorldInfoVueListOptimizat
     const commentInput = document.createElement('input');
     commentInput.type = 'checkbox';
     const commentText = document.createElement('span');
-    commentText.textContent = '包含条目名称';
+    commentText.textContent = 'Include entry names';
     commentLabel.append(commentInput, commentText);
 
     const countButton = document.createElement('button');
     countButton.type = 'button';
     countButton.className = 'menu_button bai-bai-wi-search-replace-count';
-    countButton.textContent = '统计命中';
+    countButton.textContent = 'Count matches';
 
     const replaceButton = document.createElement('button');
     replaceButton.type = 'button';
     replaceButton.className = 'menu_button danger_button bai-bai-wi-search-replace-apply';
-    replaceButton.textContent = '全部替换';
+    replaceButton.textContent = 'Replace all';
 
     form.append(findInput, replaceInput, caseLabel, commentLabel, countButton, replaceButton);
     body.append(form);
@@ -166,7 +166,7 @@ function refreshWorldInfoSearchReplacePanelControls(state, controls) {
         && stats.findValue === findValue
         && stats.caseSensitive === controls.caseInput.checked
         && stats.includeComment === controls.commentInput.checked) {
-        controls.summary.textContent = `命中 ${stats.matchedEntries} 条 / ${stats.replacementCount} 处`;
+        controls.summary.textContent = `${stats.matchedEntries} entries / ${stats.replacementCount} matches`;
         return;
     }
 
@@ -178,7 +178,7 @@ async function handleWorldInfoSearchReplaceCount(state, controls) {
 
     if (!query) {
         refreshWorldInfoSearchReplacePanelControls(state, controls);
-        showWorldInfoSearchReplaceToast('warning', '请先选择世界书。');
+        showWorldInfoSearchReplaceToast('warning', 'Select a World Info first.');
         return;
     }
 
@@ -190,11 +190,11 @@ async function handleWorldInfoSearchReplaceCount(state, controls) {
         refreshWorldInfoSearchReplacePanelControls(state, controls);
 
         if (stats.replacementCount === 0) {
-            showWorldInfoSearchReplaceToast('warning', '没有找到匹配的正文内容。');
+            showWorldInfoSearchReplaceToast('warning', 'No matching content found.');
         }
     } catch (error) {
         console.error(`${LOG_PREFIX} Failed to count World Info search matches`, error);
-        showWorldInfoSearchReplaceToast('error', `统计失败：${error?.message || String(error)}`);
+        showWorldInfoSearchReplaceToast('error', `Count failed: ${error?.message || String(error)}`);
     } finally {
         setWorldInfoSearchReplaceBusy(controls, false);
     }
@@ -205,7 +205,7 @@ async function handleWorldInfoSearchReplaceApply(state, controls) {
 
     if (!query) {
         refreshWorldInfoSearchReplacePanelControls(state, controls);
-        showWorldInfoSearchReplaceToast('warning', '请先选择世界书。');
+        showWorldInfoSearchReplaceToast('warning', 'Select a World Info first.');
         return;
     }
 
@@ -217,7 +217,7 @@ async function handleWorldInfoSearchReplaceApply(state, controls) {
         refreshWorldInfoSearchReplacePanelControls(state, controls);
 
         if (stats.replacementCount === 0) {
-            showWorldInfoSearchReplaceToast('warning', '没有找到匹配的正文内容。');
+            showWorldInfoSearchReplaceToast('warning', 'No matching content found.');
             return;
         }
 
@@ -230,10 +230,10 @@ async function handleWorldInfoSearchReplaceApply(state, controls) {
         state.worldInfoSearchReplaceStats = await getWorldInfoSearchReplaceStats(query);
         refreshWorldInfoSearchReplacePanelControls(state, controls);
         syncRenderedWorldInfoSearchReplaceContent(appliedStats.updatedEntries);
-        showWorldInfoSearchReplaceToast('success', `已替换 ${appliedStats.matchedEntries} 条 / ${appliedStats.replacementCount} 处。`);
+        showWorldInfoSearchReplaceToast('success', `Replaced ${appliedStats.matchedEntries} entries / ${appliedStats.replacementCount} matches.`);
     } catch (error) {
         console.error(`${LOG_PREFIX} Failed to replace World Info content`, error);
-        showWorldInfoSearchReplaceToast('error', `替换失败：${error?.message || String(error)}`);
+        showWorldInfoSearchReplaceToast('error', `Replace failed: ${error?.message || String(error)}`);
     } finally {
         setWorldInfoSearchReplaceBusy(controls, false);
     }
@@ -260,7 +260,7 @@ async function getWorldInfoSearchReplaceStats(query) {
     const data = await loadWorldInfo(query.worldName);
 
     if (!data?.entries || typeof data.entries !== 'object') {
-        throw new Error('无法读取当前世界书数据');
+        throw new Error('Cannot read the current World Info data');
     }
 
     return countWorldInfoSearchReplaceMatches(data, query);
@@ -270,7 +270,7 @@ async function applyWorldInfoSearchReplace(query) {
     const data = await loadWorldInfo(query.worldName);
 
     if (!data?.entries || typeof data.entries !== 'object') {
-        throw new Error('无法读取当前世界书数据');
+        throw new Error('Cannot read the current World Info data');
     }
 
     const regex = createWorldInfoSearchReplaceRegex(query.findValue, query.caseSensitive);
@@ -419,16 +419,16 @@ function escapeWorldInfoSearchReplaceRegExp(value) {
 }
 
 async function confirmWorldInfoSearchReplace(stats) {
-    const scopeText = stats.includeComment ? '正文内容和条目名称' : '正文内容';
+    const scopeText = stats.includeComment ? 'content and entry names' : 'content';
     const result = await callGenericPopup(`
         <div class="bai-bai-wi-search-replace-confirm">
-            <p>即将替换当前世界书 <strong>${escapeWorldInfoSearchReplaceHtml(stats.worldName)}</strong> 的${scopeText}。</p>
-            <p>命中条目：<strong>${stats.matchedEntries}</strong> 条<br>替换次数：<strong>${stats.replacementCount}</strong> 处</p>
-            <p>此操作会立即保存，请确认后继续。</p>
+            <p>About to replace the ${scopeText} of the current World Info <strong>${escapeWorldInfoSearchReplaceHtml(stats.worldName)}</strong>.</p>
+            <p>Matching entries: <strong>${stats.matchedEntries}</strong><br>Replacements: <strong>${stats.replacementCount}</strong></p>
+            <p>This saves immediately. Confirm to continue.</p>
         </div>
     `, POPUP_TYPE.CONFIRM, '', {
-        okButton: '全部替换',
-        cancelButton: '取消',
+        okButton: 'Replace all',
+        cancelButton: 'Cancel',
     });
 
     return result === POPUP_RESULT.AFFIRMATIVE || result === true;
@@ -477,7 +477,7 @@ function setWorldInfoSearchReplaceBusy(controls, busy) {
 
 function showWorldInfoSearchReplaceToast(type, message) {
     const toastr = globalThis.toastr;
-    const title = '世界书查找替换';
+    const title = 'World Info find and replace';
 
     if (typeof toastr?.[type] === 'function') {
         toastr[type](message, title);

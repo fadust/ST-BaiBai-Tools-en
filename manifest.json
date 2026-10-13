@@ -1,11 +1,11 @@
 {
-    "display_name": "柏宝箱",
+    "display_name": "BaiBai Tools (English)",
     "loading_order": -1000,
     "requires": [],
     "optional": [],
     "js": "dist/index.js?ver=1.0.0",
-    "author": "柏柏",
+    "author": "柏柏 · English port by fadust",
     "version": "1.0.0",
-    "homePage": "",
+    "homePage": "https://github.com/fadust/ST-BaiBai-Tools-en",
     "auto_update": false
 }

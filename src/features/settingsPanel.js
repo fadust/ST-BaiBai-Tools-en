@@ -113,7 +113,7 @@ async function renderSettingsPanel() {
         .toggleClass('disabled', !chatLossMitigationSupported)
         .css('opacity', chatLossMitigationSupported ? '' : '0.55')
         .find('span')
-        .text(chatLossMitigationSupported ? '缓解酒馆丢失聊天问题' : '缓解酒馆丢失聊天问题（1.16 及以上版本可用）');
+        .text(chatLossMitigationSupported ? 'Mitigate SillyTavern chat loss' : 'Mitigate SillyTavern chat loss (ST 1.16 and later)');
 
     $('#bai_bai_toolkit_description_codemirror_editor_enabled')
         .prop('checked', settings.descriptionCodeMirrorEditorEnabled)

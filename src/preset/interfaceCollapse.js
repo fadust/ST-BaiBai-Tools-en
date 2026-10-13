@@ -411,7 +411,7 @@ function wrapPresetInterfaceCollapse() {
     wrapper.className = 'inline-drawer wide100p flexFlowColumn';
     wrapper.innerHTML = `
         <div class="inline-drawer-toggle inline-drawer-header userSettingsInnerExpandable">
-            <b><span>预设设置</span></b>
+            <b><span>Preset settings</span></b>
             <div class="fa-solid fa-circle-chevron-down inline-drawer-icon down"></div>
         </div>
         <div class="inline-drawer-content ${PRESET_INTERFACE_COLLAPSE_CONTENT_CLASS}" style="display:none;"></div>

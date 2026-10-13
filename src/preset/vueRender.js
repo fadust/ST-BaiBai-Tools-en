@@ -98,7 +98,7 @@ function buildPresetVuePromptListItems() {
                     type: 'group',
                     groupId: item.groupId,
                     group,
-                    name: group?.name ?? t`未命名分组`,
+                    name: group?.name ?? t`Unnamed group`,
                     collapsed: Boolean(group?.collapsed),
                     enabled: group?.enabled !== false,
                     count: 0,
@@ -147,7 +147,7 @@ function renderPresetVuePromptListHeader(h, model) {
             selecting
                 ? h('span', {
                     class: 'menu_button fa-solid fa-xmark',
-                    title: t`取消分组选择`,
+                    title: t`Cancel group selection`,
                     onClick: event => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -156,7 +156,7 @@ function renderPresetVuePromptListHeader(h, model) {
                 })
                 : h('span', {
                     class: 'menu_button fa-solid fa-folder-plus',
-                    title: t`创建预设分组`,
+                    title: t`Create preset group`,
                     onClick: event => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -171,7 +171,7 @@ function renderPresetVuePromptListHeader(h, model) {
                     'bai-bai-preset-drag-lock-toggle',
                     dragLocked ? 'bai-bai-preset-drag-lock-toggle-active' : '',
                 ],
-                title: dragLocked ? t`解锁预设拖拽` : t`锁定预设拖拽`,
+                title: dragLocked ? t`Unlock preset dragging` : t`Lock preset dragging`,
                 'aria-pressed': dragLocked ? 'true' : 'false',
                 onClick: event => {
                     event.preventDefault();
@@ -366,7 +366,7 @@ function renderPresetVuePromptGroup(h, vueDraggableNext, item) {
                         'fa-solid',
                         'fa-chevron-down',
                     ],
-                    title: item.collapsed ? t`展开分组` : t`收起分组`,
+                    title: item.collapsed ? t`Expand group` : t`Collapse group`,
                     onClick: event => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -387,7 +387,7 @@ function renderPresetVuePromptGroup(h, vueDraggableNext, item) {
                         'bai-bai-preset-group-enable-toggle',
                         groupEnabled ? 'fa-toggle-on' : 'fa-toggle-off',
                     ],
-                    title: groupEnabled ? t`关闭分组供电` : t`开启分组供电`,
+                    title: groupEnabled ? t`Turn off group power` : t`Turn on group power`,
                     onClick: event => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -396,7 +396,7 @@ function renderPresetVuePromptGroup(h, vueDraggableNext, item) {
                 }),
                 h('span', {
                     class: 'menu_button fa-solid fa-pencil bai-bai-preset-group-action-button',
-                    title: t`重命名分组`,
+                    title: t`Rename group`,
                     onClick: event => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -405,7 +405,7 @@ function renderPresetVuePromptGroup(h, vueDraggableNext, item) {
                 }),
                 h('span', {
                     class: 'menu_button fa-solid fa-trash bai-bai-preset-group-action-button',
-                    title: t`删除分组`,
+                    title: t`Delete group`,
                     onClick: event => {
                         event.preventDefault();
                         event.stopPropagation();
@@ -460,7 +460,7 @@ function renderPresetVuePromptRow(h, item, { topLevel = false, groupChild = fals
         favoriteMirror
             ? h('span', {
                 class: 'drag-handle ui-sortable-handle bai-bai-preset-favorite-row-marker',
-                title: t`收藏快捷项不可拖拽`,
+                title: t`Favorite shortcuts cannot be dragged`,
             }, '\u2630')
             : h('span', { class: 'drag-handle ui-sortable-handle' }, '\u2630'),
         renderPresetVuePromptNameCell(h, prompt, prefix, { allowInspect: !favoriteMirror }),
@@ -551,7 +551,7 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
     const favoriteToggle = renderPresetVuePromptActionButton(h, {
         action: 'favorite',
         icon: 'fa-star',
-        text: isFavorite ? t`取消收藏` : t`收藏`,
+        text: isFavorite ? t`Unfavorite` : t`Favorites`,
         extraClasses: [
             'bai-bai-preset-prompt-favorite-toggle',
             isFavorite ? 'bai-bai-preset-prompt-favorite-toggle-active' : '',
@@ -562,7 +562,7 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
         ? renderPresetVuePromptActionButton(h, {
             action: 'favorite',
             icon: 'fa-star',
-            text: t`取消收藏`,
+            text: t`Unfavorite`,
             extraClasses: [
                 'bai-bai-preset-prompt-favorite-toggle',
                 'bai-bai-preset-prompt-favorite-toggle-active',
@@ -575,7 +575,7 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
         ? renderPresetVuePromptActionButton(h, {
             action: 'edit',
             icon: 'fa-pencil',
-            text: t`编辑`,
+            text: t`Edit`,
             onClick: event => handlePresetPromptActionButtonClick(event),
         })
         : null;
@@ -585,14 +585,14 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
     const globalLibraryButton = renderPresetVuePromptActionButton(h, {
         action: 'global-library',
         icon: 'fa-database',
-        text: t`添加到全局库`,
+        text: t`Add to global library`,
         onClick: event => handlePresetPromptActionButtonClick(event),
     });
     const groupRangeButton = isPresetGroupingEnabled() && !item.groupId
         ? renderPresetVuePromptActionButton(h, {
             action: 'group-range',
             icon: 'fa-folder-plus',
-            text: t`以此条目创建分组`,
+            text: t`Create a group from this entry`,
             onClick: event => handlePresetPromptActionButtonClick(event),
         })
         : null;
@@ -603,7 +603,7 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
             editButton,
             canToggle
                 ? h('span', {
-                    title: isEnabled ? t`关闭条目` : t`开启条目`,
+                    title: isEnabled ? t`Turn off entry` : t`Turn on entry`,
                     class: [
                         'menu_button',
                         'bai-bai-preset-prompt-icon-button',
@@ -618,7 +618,7 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
     return [
         persistentFavoriteToggle,
         h('span', {
-            title: t`更多操作`,
+            title: t`More actions`,
             class: 'menu_button bai-bai-preset-prompt-icon-button bai-bai-preset-prompt-actions-hint fa-solid fa-ellipsis',
             onClick: event => {
                 event.preventDefault();
@@ -634,14 +634,14 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
             renderPresetVuePromptActionButton(h, {
                 action: 'delete',
                 icon: 'fa-trash',
-                text: t`删除或移除`,
+                text: t`Delete or remove`,
                 caution: true,
                 onClick: event => handlePresetPromptActionButtonClick(event),
             }),
             renderPresetVuePromptActionButton(h, {
                 action: 'copy',
                 icon: 'fa-copy',
-                text: t`复制`,
+                text: t`Copy`,
                 onClick: event => handlePresetPromptActionButtonClick(event),
             }),
             editButtonInMenu ? editButton : null,
@@ -649,7 +649,7 @@ function renderPresetVuePromptControls(h, prompt, item, { favoriteMirror = false
         editButtonInMenu ? null : editButton,
         canToggle
             ? h('span', {
-                title: isEnabled ? t`关闭条目` : t`开启条目`,
+                title: isEnabled ? t`Turn off entry` : t`Turn on entry`,
                 class: [
                     'menu_button',
                     'bai-bai-preset-prompt-icon-button',

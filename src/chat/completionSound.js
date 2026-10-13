@@ -88,13 +88,13 @@ function initializeMessageCompletionSoundControls(persistSettings) {
             }
 
             button.addClass('disabled');
-            setMessageCompletionSoundStatus('正在试听...');
+            setMessageCompletionSoundStatus('Previewing...');
             try {
                 await playSelectedMessageCompletionSound({ preview: true });
-                setMessageCompletionSoundStatus('已播放当前提示音。');
+                setMessageCompletionSoundStatus('Played the current notification sound.');
             } catch (error) {
                 console.debug(`${LOG_PREFIX} Failed to preview message completion sound`, error);
-                setMessageCompletionSoundStatus(error?.message || '提示音播放失败。', true);
+                setMessageCompletionSoundStatus(error?.message || 'Failed to play the notification sound.', true);
             } finally {
                 button.removeClass('disabled');
             }
@@ -112,7 +112,7 @@ function initializeMessageCompletionSoundControls(persistSettings) {
             }
 
             try {
-                setMessageCompletionSoundStatus('正在保存到本机...');
+                setMessageCompletionSoundStatus('Saving to this device...');
                 const record = await saveMessageCompletionSoundLocalFile(file);
                 settings.messageCompletionSoundSource = 'local';
                 settings.messageCompletionSoundLocalFileName = record.name;
@@ -120,10 +120,10 @@ function initializeMessageCompletionSoundControls(persistSettings) {
                 persistSettings?.();
                 updateMessageCompletionSoundControls();
                 await refreshMessageCompletionSoundLocalFileLabel();
-                setMessageCompletionSoundStatus('已保存到本机。');
+                setMessageCompletionSoundStatus('Saved to this device.');
             } catch (error) {
                 console.debug(`${LOG_PREFIX} Failed to save local message completion sound`, error);
-                setMessageCompletionSoundStatus(error?.message || '本地音频保存失败。', true);
+                setMessageCompletionSoundStatus(error?.message || 'Failed to save local audio.', true);
             }
         });
 
@@ -142,10 +142,10 @@ function initializeMessageCompletionSoundControls(persistSettings) {
                 resetMessageCompletionSoundAudio();
                 persistSettings?.();
                 await refreshMessageCompletionSoundLocalFileLabel();
-                setMessageCompletionSoundStatus('已清除本机提示音。');
+                setMessageCompletionSoundStatus('Cleared the notification sound on this device.');
             } catch (error) {
                 console.debug(`${LOG_PREFIX} Failed to delete local message completion sound`, error);
-                setMessageCompletionSoundStatus(error?.message || '本地音频清除失败。', true);
+                setMessageCompletionSoundStatus(error?.message || 'Failed to clear local audio.', true);
             } finally {
                 button.removeClass('disabled');
             }
@@ -441,7 +441,7 @@ async function startMessageCompletionSoundKeepAlive() {
     } catch (error) {
         state.keepAlivePlaying = false;
         state.keepAliveLastErrorAt = Date.now();
-        setMessageCompletionSoundStatus('静音保活启动失败，浏览器可能限制了自动播放。', true);
+        setMessageCompletionSoundStatus('Silent keep-alive failed to start; the browser may be blocking autoplay.', true);
         throw error;
     }
 }
@@ -537,7 +537,7 @@ async function getMessageCompletionSoundPlaybackSrc() {
     if (source === 'url') {
         const url = String(settings.messageCompletionSoundUrl || '').trim();
         if (!url) {
-            throw new Error('请先填写音频 URL。');
+            throw new Error('Enter an audio URL first.');
         }
 
         return url;
@@ -545,7 +545,7 @@ async function getMessageCompletionSoundPlaybackSrc() {
 
     const record = await getMessageCompletionSoundLocalFile();
     if (!record?.blob) {
-        throw new Error('本机还没有上传提示音文件。');
+        throw new Error('No notification sound file uploaded on this device yet.');
     }
 
     const state = getMessageCompletionSoundState();
@@ -583,26 +583,26 @@ async function refreshMessageCompletionSoundLocalFileLabel() {
         if (record?.name) {
             label.text(record.name);
         } else if (settings.messageCompletionSoundLocalFileName) {
-            label.text(`${settings.messageCompletionSoundLocalFileName}（本机未上传）`);
+            label.text(`${settings.messageCompletionSoundLocalFileName} (not uploaded on this device)`);
         } else {
-            label.text('未上传');
+            label.text('Not uploaded');
         }
     } catch {
-        label.text('本机存储不可用');
+        label.text('Local storage unavailable');
     }
 }
 
 async function saveMessageCompletionSoundLocalFile(file) {
     if (!(file instanceof File)) {
-        throw new Error('请选择一个音频文件。');
+        throw new Error('Choose an audio file.');
     }
 
     if (!file.type.startsWith('audio/') && !isMessageCompletionSoundAudioFileName(file.name)) {
-        throw new Error('请选择浏览器可播放的音频文件。');
+        throw new Error('Choose an audio file the browser can play.');
     }
 
     if (file.size > MESSAGE_COMPLETION_SOUND_MAX_LOCAL_BYTES) {
-        throw new Error('本地提示音不能超过 5MB。');
+        throw new Error('Local notification sound must be 5 MB or less.');
     }
 
     const record = {
@@ -652,7 +652,7 @@ function isMessageCompletionSoundAudioFileName(fileName) {
 function openMessageCompletionSoundDb() {
     return new Promise((resolve, reject) => {
         if (typeof indexedDB === 'undefined') {
-            reject(new Error('当前浏览器不支持 IndexedDB。'));
+            reject(new Error('This browser does not support IndexedDB.'));
             return;
         }
 
@@ -664,23 +664,23 @@ function openMessageCompletionSoundDb() {
             }
         };
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error('IndexedDB 打开失败。'));
-        request.onblocked = () => reject(new Error('IndexedDB 正被其他页面占用。'));
+        request.onerror = () => reject(request.error || new Error('Failed to open IndexedDB.'));
+        request.onblocked = () => reject(new Error('IndexedDB is in use by another page.'));
     });
 }
 
 function idbRequest(request) {
     return new Promise((resolve, reject) => {
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error('IndexedDB 请求失败。'));
+        request.onerror = () => reject(request.error || new Error('IndexedDB request failed.'));
     });
 }
 
 function idbTransactionDone(transaction) {
     return new Promise((resolve, reject) => {
         transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error || new Error('IndexedDB 事务失败。'));
-        transaction.onabort = () => reject(transaction.error || new Error('IndexedDB 事务已取消。'));
+        transaction.onerror = () => reject(transaction.error || new Error('IndexedDB transaction failed.'));
+        transaction.onabort = () => reject(transaction.error || new Error('IndexedDB transaction aborted.'));
     });
 }
 

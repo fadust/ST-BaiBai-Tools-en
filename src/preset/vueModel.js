@@ -11,12 +11,12 @@ async function startPresetVuePromptGroupRangeSelection(model, { startId = null }
     const promptIds = getPresetVuePromptFlatIds(model);
 
     if (promptIds.length === 0) {
-        toastr.warning(t`没有可用于分组的预设条目。`);
+        toastr.warning(t`No preset entries available for grouping.`);
         return;
     }
 
     if (startId && !promptIds.includes(startId)) {
-        toastr.warning(t`不能将这个预设条目作为分组起点。`);
+        toastr.warning(t`This preset entry cannot be a group start.`);
         return;
     }
 
@@ -28,7 +28,7 @@ async function startPresetVuePromptGroupRangeSelection(model, { startId = null }
         hoverId: startId,
     };
     getPresetVuePromptListManagerState().dragSnapshot = null;
-    toastr.info(startId ? t`请选择分组的结束条目。` : t`请选择分组的起始条目。`);
+    toastr.info(startId ? t`Choose the group's end entry.` : t`Choose the group's start entry.`);
 }
 
 function cancelPresetVuePromptGroupRangeSelection(model) {
@@ -61,14 +61,14 @@ function handlePresetVuePromptRangeSelectionClick(model, item, event) {
     if (!model.rangeSelection.startId) {
         model.rangeSelection.startId = item.id;
         model.rangeSelection.hoverId = item.id;
-        toastr.info(t`请选择分组的结束条目。`);
+        toastr.info(t`Choose the group's end entry.`);
         return;
     }
 
     if (model.rangeSelection.startId === item.id && !model.rangeSelection.endId) {
         model.rangeSelection.startId = null;
         model.rangeSelection.hoverId = null;
-        toastr.info(t`已取消起点选择，请重新选择分组的起始条目。`);
+        toastr.info(t`Start selection cancelled; choose the group's start entry again.`);
         return;
     }
 
@@ -88,14 +88,14 @@ async function finishPresetVuePromptGroupRangeSelection(model) {
     const rangeIds = getPresetVuePromptRangeIds(model);
 
     if (rangeIds.length === 0) {
-        toastr.warning(t`没有选中可分组的预设条目。`);
+        toastr.warning(t`No groupable preset entries selected.`);
         cancelPresetVuePromptGroupRangeSelection(model);
         return;
     }
 
-    const name = await callGenericPopup(t`预设分组名称`, POPUP_TYPE.INPUT, model.rangeSelection?.name || '', {
-        okButton: t`创建分组`,
-        cancelButton: t`取消`,
+    const name = await callGenericPopup(t`Preset group name`, POPUP_TYPE.INPUT, model.rangeSelection?.name || '', {
+        okButton: t`Create group`,
+        cancelButton: t`Cancel`,
     });
 
     if (!model?.rangeSelection?.active) {
@@ -110,7 +110,7 @@ async function finishPresetVuePromptGroupRangeSelection(model) {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-        toastr.warning(t`分组名称不能为空。`);
+        toastr.warning(t`Group name cannot be empty.`);
         model.rangeSelection.endId = null;
         return;
     }
@@ -392,9 +392,9 @@ async function renamePresetVuePromptGroup(groupId) {
         return;
     }
 
-    const name = await callGenericPopup(t`预设分组名称`, POPUP_TYPE.INPUT, group.name || '', {
-        okButton: t`保存`,
-        cancelButton: t`取消`,
+    const name = await callGenericPopup(t`Preset group name`, POPUP_TYPE.INPUT, group.name || '', {
+        okButton: t`Save`,
+        cancelButton: t`Cancel`,
     });
 
     if (typeof name !== 'string') {
@@ -404,7 +404,7 @@ async function renamePresetVuePromptGroup(groupId) {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-        toastr.warning(t`分组名称不能为空。`);
+        toastr.warning(t`Group name cannot be empty.`);
         return;
     }
 
@@ -421,7 +421,7 @@ async function deletePresetVuePromptGroup(groupId) {
         return;
     }
 
-    const confirmed = await callGenericPopup(t`要删除这个预设分组吗？预设条目会保留在原位置。`, POPUP_TYPE.CONFIRM);
+    const confirmed = await callGenericPopup(t`Delete this preset group? Its entries stay where they are.`, POPUP_TYPE.CONFIRM);
 
     if (!confirmed) {
         return;

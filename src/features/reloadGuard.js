@@ -29,7 +29,7 @@ function isChatLossMitigationSupported() {
 function installReloadGreetingGuard() {
     try {
         if (!isChatLossMitigationSupported()) {
-            console.debug(`${LOG_PREFIX} 当前 ST 版本低于 1.16.0,聊天丢失缓解不可用,已跳过`);
+            console.debug(`${LOG_PREFIX} SillyTavern version is below 1.16.0; chat-loss mitigation unavailable, skipped`);
             return;
         }
         const mutex = scriptModule.reloadChatMutex;
@@ -46,16 +46,16 @@ function installReloadGreetingGuard() {
                 try {
                     await maybeRecoverFromGreetingOverwrite(snapshot);
                 } catch (error) {
-                    console.error(`${LOG_PREFIX} 聊天丢失缓解执行失败:`, error);
+                    console.error(`${LOG_PREFIX} Chat-loss mitigation failed:`, error);
                 }
             }
         }
         guardedReload[RELOAD_GREETING_GUARD_KEY] = true;
         guardedReload.__baiBaiToolkitOriginal = original;
         mutex.callback = guardedReload;
-        console.debug(`${LOG_PREFIX} 已启用缓解酒馆丢失聊天问题`);
+        console.debug(`${LOG_PREFIX} Enabled mitigation for SillyTavern chat loss`);
     } catch (error) {
-        console.error(`${LOG_PREFIX} 启用缓解酒馆丢失聊天问题失败:`, error);
+        console.error(`${LOG_PREFIX} Failed to enable mitigation for SillyTavern chat loss:`, error);
     }
 }
 
@@ -86,7 +86,7 @@ function takeReloadSnapshot() {
             metadata: scriptModule.chat_metadata,          // 旧 metadata 引用(getChat 会重赋绑定)
         };
     } catch (error) {
-        console.error(`${LOG_PREFIX} 聊天快照失败:`, error);
+        console.error(`${LOG_PREFIX} Chat snapshot failed:`, error);
         return null;
     }
 }
@@ -137,7 +137,7 @@ async function maybeRecoverFromGreetingOverwrite(snap) {
         return;
     }
 
-    console.warn(`${LOG_PREFIX} 检测到切换正则触发酒馆 BUG 导致聊天被覆盖(原 ${snap.length} 条),正在自动恢复…`);
+    console.warn(`${LOG_PREFIX} Detected a SillyTavern bug triggered by switching regex that overwrote the chat (originally ${snap.length} messages); restoring automatically…`);
 
     // 1) 原地恢复内存中的消息数组(chat 是只读绑定,不能赋值,只能 splice)
     const c = scriptModule.chat;
@@ -172,18 +172,18 @@ async function maybeRecoverFromGreetingOverwrite(snap) {
         }
         saved = true;
     } catch (error) {
-        console.error(`${LOG_PREFIX} 聊天记录已在内存恢复,但重新写盘失败:`, error);
+        console.error(`${LOG_PREFIX} Chat history restored in memory, but writing it to disk failed:`, error);
     }
 
     try {
         if (saved) {
-            toastr.success(`柏宝箱已拦截一次酒馆 BUG 导致的聊天记录丢失,已自动恢复 ${c.length} 条消息`);
+            toastr.success(`BaiBai Tools caught a chat loss caused by a SillyTavern bug and restored ${c.length} messages automatically`);
         } else {
-            toastr.warning('柏宝箱已在界面恢复聊天记录,但写盘失败,请检查后端连接后手动保存一次');
+            toastr.warning('BaiBai Tools restored the chat in the UI, but writing to disk failed; check the backend connection and save once by hand');
         }
     } catch { /* toastr 不可用时忽略 */ }
 
-    console.warn(`${LOG_PREFIX} 聊天记录已恢复(${c.length} 条),写盘${saved ? '成功' : '失败'}`);
+    console.warn(`${LOG_PREFIX} Chat history restored (${c.length} messages), disk write ${saved ? 'succeeded' : 'failed'}`);
 }
 
 export {

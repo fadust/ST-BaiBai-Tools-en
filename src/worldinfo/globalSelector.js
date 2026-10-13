@@ -359,8 +359,8 @@ function refreshWorldInfoGlobalSelectorDisplay(select) {
         removeButton.className = 'bai-bai-wi-global-selector-chip-remove';
         removeButton.type = 'button';
         removeButton.textContent = '×';
-        removeButton.title = '移除';
-        removeButton.setAttribute('aria-label', `移除 ${label.textContent}`);
+        removeButton.title = 'Remove';
+        removeButton.setAttribute('aria-label', `Remove ${label.textContent}`);
         removeButton.addEventListener('pointerdown', event => {
             event.preventDefault();
             event.stopPropagation();
@@ -424,13 +424,13 @@ function openWorldInfoGlobalSelectorDropdown(select, state = getWorldInfoVueList
     const searchInput = document.createElement('input');
     searchInput.className = 'bai-bai-wi-global-selector-search';
     searchInput.type = 'search';
-    searchInput.placeholder = '搜索世界书...';
+    searchInput.placeholder = 'Search World Info...';
     const clearSearchButton = document.createElement('button');
     clearSearchButton.className = 'bai-bai-wi-global-selector-search-clear';
     clearSearchButton.type = 'button';
     clearSearchButton.textContent = '×';
-    clearSearchButton.title = '清空搜索';
-    clearSearchButton.setAttribute('aria-label', '清空搜索');
+    clearSearchButton.title = 'Clear search';
+    clearSearchButton.setAttribute('aria-label', 'Clear search');
     searchBox.append(searchInput, clearSearchButton);
 
     if (isMobile()) {
@@ -599,7 +599,7 @@ function renderWorldInfoGlobalSelectorDropdownOptions(select, optionsContainer, 
     if (options.length === 0) {
         const empty = document.createElement('div');
         empty.className = 'bai-bai-wi-global-selector-empty';
-        empty.textContent = '没有找到匹配的世界书';
+        empty.textContent = 'No matching World Info found';
         optionsContainer.append(empty);
         return;
     }
@@ -771,9 +771,9 @@ function getWorldInfoGlobalSelectorPlaceholder(select) {
     const placeholder = select.getAttribute('data-placeholder')
         || select.getAttribute('placeholder')
         || select.querySelector('option[value=""]')?.textContent
-        || '搜索/选择全局世界书...';
+        || 'Search/select global World Info...';
 
-    return String(placeholder).trim() || '搜索/选择全局世界书...';
+    return String(placeholder).trim() || 'Search/select global World Info...';
 }
 
 function getWorldInfoGlobalSelectorSelect2Container(select) {
